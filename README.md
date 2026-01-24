@@ -1,36 +1,162 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Concours de Tajwid – Notation des élèves
 
-## Getting Started
+Application Next.js permettant à des jurys de noter des élèves lors d'un concours de Tajwid (récitation et mémorisation du Coran). Chaque formulaire comporte 10 critères notés sur 10, et les résultats sont centralisés dans **Supabase**.
 
-First, run the development server:
+## 🎯 Fonctionnalités
+
+- **Accueil dynamique** : liste des 6 niveaux avec élèves chargés depuis Supabase
+- **Formulaire de notation** : 10 critères notés sur 10, moyenne calculée en direct
+- **Admin** : affichage des notes par niveau avec moyennes et détails des jurys
+- **Gestion des élèves** : ajout/modification depuis Supabase sans redéploiement
+- **Multi-device** : responsive (smartphone, tablette, laptop)
+- **Gratuit** : Supabase (BDD) + Vercel/Netlify (hébergement)
+
+## 📊 Niveaux disponibles
+
+1. **Tajwid par récitation - Niveau 1** (فئة التجويد بالتلاوة : المستوى الأول)
+2. **Tajwid par mémorisation - Niveau 1** (فئة التجويد بالحفظ : المستوى الأول)
+3. **Tajwid par mémorisation - Niveau 2** (فئة التجويد بالحفظ : المستوى الثاني)
+4. **Tajwid par mémorisation - Niveau préparatoire** (فئة التجويد بالحفظ : المستوى التحضيري)
+5. **Tajwid par mémorisation - Niveau 3** (فئة التجويد بالحفظ : المستوى الثالث)
+6. **Tajwid par mémorisation - Niveau 4** (فئة التجويد بالحفظ : المستوى الرابع)
+
+## 🚀 Installation rapide
+
+### 1. Cloner et installer
+```bash
+git clone <url-du-repo>
+cd tajwid
+npm install
+```
+
+### 2. Configurer Supabase
+
+1. Créez un projet sur [Supabase](https://supabase.com)
+2. Dans l'éditeur SQL, exécutez le script `docs/supabase-setup.sql`
+3. Récupérez vos clés API (Settings → API)
+
+### 3. Variables d'environnement
+
+```bash
+cp .env.local.example .env.local
+```
+
+Éditez `.env.local` :
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://votreprojet.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+```
+
+### 4. Lancer en local
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📝 Gestion des élèves
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Les élèves sont gérés directement dans Supabase** (pas besoin de modifier le code !)
 
-## Learn More
+### Ajouter un élève
 
-To learn more about Next.js, take a look at the following resources:
+**Via l'interface Supabase** :
+1. Table Editor → `eleves` → Insert row
+2. Remplissez :
+   - `niveau` : `hifdh-niveau2` (voir la liste dans `docs/GESTION-ELEVES.md`)
+   - `nom` : `DUPONT`
+   - `prenom` : `Marie`
+   - `professeur` : `Mme MARTIN`
+3. Save
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Via SQL** :
+```sql
+INSERT INTO eleves (niveau, nom, prenom, professeur)
+VALUES ('hifdh-niveau2', 'DUPONT', 'Marie', 'Mme MARTIN');
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+L'élève apparaît immédiatement sur le site !
 
-## Deploy on Vercel
+📖 **Documentation complète** : [`docs/GESTION-ELEVES.md`](docs/GESTION-ELEVES.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📚 Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [`docs/GUIDE-RAPIDE.md`](docs/GUIDE-RAPIDE.md) : Configuration Supabase en 7 étapes
+- [`docs/GESTION-ELEVES.md`](docs/GESTION-ELEVES.md) : Ajouter/modifier/supprimer des élèves
+- [`docs/supabase-setup.sql`](docs/supabase-setup.sql) : Script SQL complet
+- [`docs/deploiement.md`](docs/deploiement.md) : Déploiement Vercel/Netlify
+- [`docs/choix-techno.md`](docs/choix-techno.md) : Comparaison des technologies
+
+## 🏗️ Architecture
+
+```
+app/
+├── page.tsx                        # Accueil (liste des niveaux/élèves)
+├── notes/[niveau]/[eleve]/        # Formulaire de notation
+├── admin/page.tsx                 # Tableau des notes par niveau
+└── api/notes/route.ts             # API pour enregistrer les notes
+
+data/
+└── niveaux.ts                     # Configuration des niveaux (labels, couleurs)
+
+lib/
+├── supabase/client.ts             # Client Supabase
+└── eleves.ts                      # Chargement dynamique des élèves
+
+types/
+└── supabase.ts                    # Types TypeScript de la base
+```
+
+### Base de données Supabase
+
+- **`eleves`** : Nom, prénom, niveau, professeur
+- **`notes`** : Évaluations des jurys (10 critères + moyenne)
+
+## 🛠️ Technologies
+
+- **Next.js 16** (App Router + TypeScript)
+- **Tailwind CSS** (styling responsive)
+- **Supabase** (Postgres + API REST gratuite)
+- **Vercel/Netlify** (hébergement gratuit)
+
+## 🚢 Déploiement
+
+### Vercel (recommandé)
+
+1. Poussez votre code sur GitHub
+2. Importez le projet sur [Vercel](https://vercel.com)
+3. Ajoutez les variables d'environnement
+4. Deploy !
+
+Voir [`docs/GUIDE-RAPIDE.md`](docs/GUIDE-RAPIDE.md) pour plus de détails.
+
+## 📊 Utilisation
+
+### Pour les jurys
+
+1. Accédez à l'URL du site
+2. Sélectionnez le niveau puis l'élève
+3. Remplissez les 10 critères (note sur 10 pour chaque)
+4. Indiquez votre nom (jury)
+5. Cliquez sur "Enregistrer la note"
+
+### Pour les administrateurs
+
+1. Allez sur `/admin`
+2. Consultez les notes par niveau
+3. Comparez les évaluations des différents jurys
+4. Voyez les moyennes en temps réel
+
+## 🔒 Sécurité
+
+Les politiques RLS (Row Level Security) de Supabase permettent :
+- ✅ Lecture publique des élèves et notes
+- ✅ Insertion publique des notes
+- ❌ Pas de modification/suppression des notes (sauf admin Supabase)
+
+Pour restreindre l'accès, modifiez les politiques dans le script SQL.
+
+## 📄 Licence
+
+Projet associatif – usage libre.
