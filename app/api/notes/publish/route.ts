@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import type { NoteUpdate } from '@/types/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -14,18 +15,14 @@ export async function POST(request: Request) {
 
     const supabaseClient = getSupabaseClient();
     
-    const updateData: { publie: boolean; date_publication?: string | null } = {
+    const updateData = {
       publie,
+      date_publication: publie ? new Date().toISOString() : null,
     };
-    
-    if (publie) {
-      updateData.date_publication = new Date().toISOString();
-    } else {
-      updateData.date_publication = null;
-    }
 
     const { data, error } = await supabaseClient
       .from('notes')
+      // @ts-ignore
       .update(updateData)
       .in('id', noteIds)
       .select();

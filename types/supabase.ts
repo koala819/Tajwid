@@ -21,6 +21,18 @@ export type NoteInsert = {
   recorded_at?: string;
 };
 
+export type NoteUpdate = {
+  niveau?: string;
+  eleve?: string;
+  jury?: string;
+  total?: number;
+  moyenne?: number;
+  scores?: Record<string, number>;
+  recorded_at?: string;
+  publie?: boolean;
+  date_publication?: string | null;
+};
+
 export type EleveRow = {
   id: string;
   niveau: string;
@@ -46,7 +58,7 @@ export type Database = {
       notes: {
         Row: NoteRow;
         Insert: NoteInsert;
-        Update: Partial<NoteInsert>;
+        Update: NoteUpdate;
       };
       eleves: {
         Row: EleveRow;

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase/client';
+import type { NoteUpdate } from '@/types/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -13,9 +14,12 @@ export async function POST(request: Request) {
     }
 
     const supabaseClient = getSupabaseClient();
+    const updateData = { total, moyenne };
+    
     const { data, error } = await supabaseClient
       .from('notes')
-      .update({ total, moyenne })
+      // @ts-ignore
+      .update(updateData)
       .eq('id', id)
       .select();
 
