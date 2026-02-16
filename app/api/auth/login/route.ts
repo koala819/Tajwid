@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const ADMIN_USERNAME = 'root';
-const ADMIN_PASSWORD = 'ihsane26';
+const USERS = {
+  Hanan: 'Ght1vtt9',
+  Abderrahmane: '3cmc26',
+  root: 'ihsane26', // Admin
+};
 
 export async function POST(request: Request) {
   try {
@@ -10,19 +13,37 @@ export async function POST(request: Request) {
     const { username, password } = body;
 
     // Vérification des identifiants
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      // Créer un token simple (pour une vraie app, utiliser JWT)
-      const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
-      
-      // Définir le cookie de session
+    if (USERS[username as keyof typeof USERS] === password) {
       const cookieStore = await cookies();
-      cookieStore.set('admin_session', token, {
+      
+      // Cookie de session utilisateur
+      cookieStore.set('user_session', 'authenticated', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 60 * 60 * 24, // 24 heures
+        maxAge: 60 * 60 * 8, // 8 heures
         path: '/',
       });
+
+      // Stocker le nom d'utilisateur
+      cookieStore.set('user_name', username, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 8,
+        path: '/',
+      });
+
+      // Cookie admin supplémentaire pour root uniquement
+      if (username === 'root') {
+        cookieStore.set('admin_session', 'authenticated', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24,
+          path: '/',
+        });
+      }
 
       return NextResponse.json({ success: true });
     }

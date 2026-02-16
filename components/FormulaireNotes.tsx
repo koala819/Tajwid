@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { criteres } from '@/data/criteres';
 
@@ -24,6 +24,22 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
   const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const router = useRouter();
 
+  // Récupérer le nom du jury depuis la session
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/auth/user');
+        if (response.ok) {
+          const data = await response.json();
+          setJury(data.username);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du nom d\'utilisateur', error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   const total = useMemo(
     () => Object.values(scores).reduce((sum, value) => sum + value, 0),
     [scores]
@@ -45,8 +61,8 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!jury.trim()) {
-      setMessage('Veuillez indiquer votre nom (jury).');
+    if (!jury) {
+      setMessage('Erreur: Nom du jury non trouvé. Veuillez vous reconnecter.');
       return;
     }
 
@@ -218,22 +234,13 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           </label>
         </div>
 
-        {/* Nom du jury */}
-        <div className="space-y-2">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-              Nom du jury <span className="text-amber-600">*</span>
-            </span>
-            <input
-              type="text"
-              value={jury}
-              onChange={(event) => setJury(event.target.value)}
-              placeholder="Ex. M. Ahmed ou Mme Fatima"
-              className="w-full rounded border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-normal text-stone-800 outline-none transition focus:border-amber-500 focus:bg-white dark:border-neutral-600 dark:bg-neutral-700 dark:text-stone-100 dark:focus:border-amber-500"
-              required
-            />
-          </label>
-        </div>
+        {/* Affichage du jury connecté */}
+        {jury && (
+          <div className="rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-700">
+            <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">Jury</p>
+            <p className="mt-1 text-sm font-medium text-stone-800 dark:text-stone-100">{jury}</p>
+          </div>
+        )}
 
         {status === 'error' && message && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-normal text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
@@ -246,7 +253,7 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           disabled={status === 'saving'}
           className="w-full rounded-lg bg-amber-700 px-6 py-4 text-sm font-medium uppercase tracking-wider text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-wait disabled:opacity-50 dark:bg-amber-600 dark:hover:bg-amber-500"
         >
-          {status === 'saving' ? 'Enregistrement…' : 'Enregistrer la note'}
+          {status === 'saving' ? 'Enregistrement…' : 'Enregistrer'}
         </button>
       </form>
     </div>

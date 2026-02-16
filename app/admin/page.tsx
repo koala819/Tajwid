@@ -10,10 +10,11 @@ import AdminContent from './AdminContent';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  // Vérifier l'authentification
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    redirect('/login');
+  // Vérifier l'authentification admin
+  const { isAdmin } = await import('@/lib/auth');
+  const admin = await isAdmin();
+  if (!admin) {
+    redirect('/login?redirect=/admin');
   }
   const supabaseClient = getSupabaseClient();
   

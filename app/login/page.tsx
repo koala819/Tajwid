@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
-  const [username, setUsername] = useState('');
+function LoginForm() {
+  const [username, setUsername] = useState('Hanan');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +26,8 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        router.push('/admin');
+        const redirect = searchParams.get('redirect') || '/';
+        router.push(redirect);
       } else {
         setError(data.error || 'Identifiants incorrects');
       }
@@ -41,10 +43,10 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-normal text-stone-800 dark:text-stone-100">
-            Administration
+            Connexion
           </h1>
           <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-            Espace réservé aux administrateurs
+            Accédez à l'évaluation
           </p>
         </div>
 
@@ -52,17 +54,17 @@ export default function LoginPage() {
           <div className="space-y-2">
             <label className="flex flex-col gap-2">
               <span className="text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                Identifiant
+                Jury
               </span>
-              <input
-                type="text"
+              <select
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Votre identifiant"
                 className="w-full rounded border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-normal text-stone-800 outline-none transition focus:border-amber-500 focus:bg-white dark:border-neutral-600 dark:bg-neutral-700 dark:text-stone-100 dark:focus:border-amber-500"
                 required
-                autoComplete="username"
-              />
+              >
+                <option value="Hanan">Hanan</option>
+                <option value="Abderrahmane">Abderrahmane</option>
+              </select>
             </label>
           </div>
 
@@ -97,16 +99,19 @@ export default function LoginPage() {
             {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
-
-        <div className="text-center">
-          <a
-            href="/"
-            className="text-sm text-stone-500 transition-colors hover:text-amber-700 dark:text-stone-400 dark:hover:text-amber-500"
-          >
-            ← Retour à l'accueil
-          </a>
-        </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-stone-50 dark:bg-neutral-900">
+        <div className="text-stone-600 dark:text-stone-400">Chargement...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
