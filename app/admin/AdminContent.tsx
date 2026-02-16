@@ -23,7 +23,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
 
   // Charger la préférence de langue depuis localStorage
   useEffect(() => {
-    const savedLang = localStorage.getItem('admin_langue') as Language;
+    const savedLang = localStorage.getItem('app_langue') as Language;
     if (savedLang === 'ar' || savedLang === 'fr') {
       setLang(savedLang);
     }
@@ -32,7 +32,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
   // Écouter les changements de langue
   useEffect(() => {
     const handleStorage = () => {
-      const newLang = localStorage.getItem('admin_langue') as Language;
+      const newLang = localStorage.getItem('app_langue') as Language;
       if (newLang === 'ar' || newLang === 'fr') {
         setLang(newLang);
       }
@@ -51,7 +51,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
   const toggleLang = () => {
     const newLang: Language = lang === 'fr' ? 'ar' : 'fr';
     setLang(newLang);
-    localStorage.setItem('admin_langue', newLang);
+    localStorage.setItem('app_langue', newLang);
     window.dispatchEvent(new Event('storage'));
   };
 

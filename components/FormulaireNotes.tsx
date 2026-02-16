@@ -3,6 +3,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { criteres } from '@/data/criteres';
+import { useLanguage } from '@/hooks/useLanguage';
+import { t } from '@/data/translations';
+import LanguageSwitch from '@/components/LanguageSwitch';
 
 type ScoreMap = Record<string, number>;
 
@@ -23,6 +26,7 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
   const [message, setMessage] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const router = useRouter();
+  const lang = useLanguage();
 
   // Récupérer le nom du jury depuis la session
   useEffect(() => {
@@ -123,17 +127,17 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-normal text-stone-800 dark:text-stone-100">
-              Note enregistrée
+              {t('successTitle', lang)}
             </h2>
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              La note a été enregistrée avec succès dans la base de données.
+              {t('successMessage', lang)}
             </p>
           </div>
           <button
             onClick={handleConfirmSuccess}
             className="w-full rounded-lg bg-amber-700 px-6 py-4 text-sm font-medium uppercase tracking-wider text-white shadow-sm transition hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
           >
-            Retour à l'accueil
+            {t('backToHome', lang)}
           </button>
         </div>
       </div>
@@ -142,13 +146,16 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
 
   return (
     <div className="space-y-8 rounded-lg border border-stone-200 bg-white p-8 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
-      <section className="space-y-4 border-b border-stone-200 pb-6 dark:border-neutral-700">
-        <p className="text-right text-sm font-normal text-stone-700 dark:text-stone-200" dir="rtl">
-          توزيع النقاط لمسابقة التجويد (المجموع 100 نقطة)
-        </p>
-        <p className="text-xs text-stone-500 dark:text-stone-400">
-          Distribution des points (Total 100 points)
-        </p>
+      <section className="flex items-center justify-between border-b border-stone-200 pb-6 dark:border-neutral-700">
+        <div className="space-y-2">
+          <p className="text-right text-sm font-normal text-stone-700 dark:text-stone-200" dir="rtl">
+            توزيع النقاط لمسابقة التجويد (المجموع 100 نقطة)
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">
+            Distribution des points (Total 100 points)
+          </p>
+        </div>
+        <LanguageSwitch />
       </section>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -157,18 +164,34 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-stone-200 dark:border-neutral-700">
-                <th className="p-3 text-right text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400" dir="rtl">
-                  المعايير
-                </th>
-                <th className="p-3 text-left text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Critères
-                </th>
-                <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Max
-                </th>
-                <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Note
-                </th>
+                {lang === 'ar' ? (
+                  <>
+                    <th className="p-3 text-right text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400" dir="rtl">
+                      المعايير
+                    </th>
+                    <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      الحد الأقصى
+                    </th>
+                    <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      النقطة
+                    </th>
+                  </>
+                ) : (
+                  <>
+                    <th className="p-3 text-right text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400" dir="rtl">
+                      المعايير
+                    </th>
+                    <th className="p-3 text-left text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Critères
+                    </th>
+                    <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Max
+                    </th>
+                    <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                      Note
+                    </th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -221,15 +244,16 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
         {/* Observations */}
         <div className="space-y-2">
           <label className="flex flex-col gap-2">
-            <span className="text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400" dir="rtl">
-              الملاحظات · Observations
+            <span className={`text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400 ${lang === 'ar' ? 'text-right' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+              {lang === 'ar' ? 'الملاحظات' : 'Observations'}
             </span>
             <textarea
               value={observations}
               onChange={(event) => setObservations(event.target.value)}
-              placeholder="Notes et observations..."
+              placeholder={lang === 'ar' ? 'ملاحظات...' : 'Notes et observations...'}
               rows={3}
               className="w-full rounded border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-normal text-stone-800 outline-none transition focus:border-amber-500 focus:bg-white dark:border-neutral-600 dark:bg-neutral-700 dark:text-stone-100 dark:focus:border-amber-500"
+              dir={lang === 'ar' ? 'rtl' : 'ltr'}
             />
           </label>
         </div>
@@ -237,7 +261,9 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
         {/* Affichage du jury connecté */}
         {jury && (
           <div className="rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-700">
-            <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">Jury</p>
+            <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
+              {lang === 'ar' ? 'الحكم' : 'Jury'}
+            </p>
             <p className="mt-1 text-sm font-medium text-stone-800 dark:text-stone-100">{jury}</p>
           </div>
         )}
@@ -253,7 +279,7 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           disabled={status === 'saving'}
           className="w-full rounded-lg bg-amber-700 px-6 py-4 text-sm font-medium uppercase tracking-wider text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-wait disabled:opacity-50 dark:bg-amber-600 dark:hover:bg-amber-500"
         >
-          {status === 'saving' ? 'Enregistrement…' : 'Enregistrer'}
+          {status === 'saving' ? t('saving', lang) : t('save', lang)}
         </button>
       </form>
     </div>

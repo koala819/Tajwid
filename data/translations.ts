@@ -16,9 +16,9 @@ export const translations = {
     
     // Créneaux
     'samedi-matin': 'Samedi matin',
-    'samedi-apres-midi': 'Samedi après-midi',
+    'samedi-aprem': 'Samedi après-midi',
     'dimanche-matin': 'Dimanche matin',
-    'dimanche-apres-midi': 'Dimanche après-midi',
+    'dimanche-aprem': 'Dimanche après-midi',
     
     // Niveaux
     selectLevel: 'Choisissez votre niveau',
@@ -86,9 +86,9 @@ export const translations = {
     
     // Créneaux
     'samedi-matin': 'السبت صباحا',
-    'samedi-apres-midi': 'السبت بعد الظهر',
+    'samedi-aprem': 'السبت بعد الظهر',
     'dimanche-matin': 'الأحد صباحا',
-    'dimanche-apres-midi': 'الأحد بعد الظهر',
+    'dimanche-aprem': 'الأحد بعد الظهر',
     
     // Niveaux
     selectLevel: 'اختر مستواك',

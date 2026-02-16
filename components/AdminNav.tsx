@@ -8,13 +8,13 @@ export default function AdminNav() {
   const [lang, setLang] = useState<Language>('fr');
 
   useEffect(() => {
-    const savedLang = localStorage.getItem('admin_langue') as Language;
+    const savedLang = localStorage.getItem('app_langue') as Language;
     if (savedLang === 'ar' || savedLang === 'fr') {
       setLang(savedLang);
     }
 
     const handleStorage = () => {
-      const newLang = localStorage.getItem('admin_langue') as Language;
+      const newLang = localStorage.getItem('app_langue') as Language;
       if (newLang === 'ar' || newLang === 'fr') {
         setLang(newLang);
       }
