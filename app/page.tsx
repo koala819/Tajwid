@@ -79,7 +79,7 @@ export default async function Home() {
               <span>Voir les résultats</span>
             </Link>
             <Link
-              href="/login"
+              href="/admin"
               className="inline-flex items-center gap-2 text-sm text-stone-500 transition-colors hover:text-amber-700 dark:text-stone-400 dark:hover:text-amber-500"
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
