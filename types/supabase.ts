@@ -7,6 +7,8 @@ export type NoteRow = {
   moyenne: number;
   scores: Record<string, number>;
   recorded_at: string;
+  publie: boolean;
+  date_publication: string | null;
 };
 
 export type NoteInsert = {
@@ -26,6 +28,15 @@ export type EleveRow = {
   prenom: string;
   professeur: string | null;
   creneau: string;
+  date_naissance: string | null;
+  age: number | null;
+  classe: string | null;
+  note1: number | null;
+  note2: number | null;
+  moyenne_qualif: number | null;
+  observation: string | null;
+  qualification: string | null;
+  competition: string | null;
   created_at: string;
 };
 

@@ -12,8 +12,14 @@ const slugify = (value: string) =>
 export type Eleve = {
   id: string;
   name: string;
+  prenom: string;
+  nom: string;
   slug: string;
   professeur?: string;
+  moyenne_qualif?: number;
+  note1?: number;
+  note2?: number;
+  observation?: string;
 };
 
 export type Niveau = {
@@ -27,60 +33,60 @@ export type Niveau = {
 // Configuration des niveaux (labels, couleurs, descriptions)
 export const niveauxConfig: Niveau[] = [
   {
-    slug: 'tilawa-niveau1',
-    label: 'Tajwid par récitation - Niveau 1',
-    labelAr: 'فئة التجويد بالتلاوة : المستوى الأول',
-    description: 'Récitation avec les règles de tajwid',
-    color: '#dbeafe',
-  },
-  {
-    slug: 'tilawa-niveau2',
-    label: 'Tajwid par récitation - Niveau 2',
-    labelAr: 'فئة التجويد بالتلاوة : المستوى الثاني',
-    description: 'Récitation avec tajwid - Niveau intermédiaire',
-    color: '#bfdbfe',
-  },
-  {
-    slug: 'tilawa-niveau3',
-    label: 'Tajwid par récitation - Niveau 3',
-    labelAr: 'فئة التجويد بالتلاوة : المستوى الثالث',
-    description: 'Récitation avec tajwid - Niveau avancé',
-    color: '#93c5fd',
+    slug: 'hifdh-preparatoire',
+    label: 'Niveau préparatoire',
+    labelAr: 'المستوى التحضيري',
+    description: 'Niveau préparatoire (6-10 ans)',
+    color: '#fed7aa',
   },
   {
     slug: 'hifdh-niveau1',
-    label: 'Tajwid par mémorisation - Niveau 1',
-    labelAr: 'فئة التجويد بالحفظ : المستوى الأول',
-    description: 'Mémorisation avec tajwid - Niveau débutant',
+    label: 'Niveau 1',
+    labelAr: 'المستوى الأول',
+    description: 'Niveau débutant',
     color: '#dcfce7',
   },
   {
     slug: 'hifdh-niveau2',
-    label: 'Tajwid par mémorisation - Niveau 2',
-    labelAr: 'فئة التجويد بالحفظ : المستوى الثاني',
-    description: 'Mémorisation avec tajwid - Niveau intermédiaire',
+    label: 'Niveau 2',
+    labelAr: 'المستوى الثاني',
+    description: 'Niveau intermédiaire',
     color: '#fef3c7',
   },
   {
-    slug: 'hifdh-preparatoire',
-    label: 'Tajwid par mémorisation - Niveau préparatoire',
-    labelAr: 'فئة التجويد بالحفظ : المستوى التحضيري',
-    description: 'Mémorisation avec tajwid - Niveau préparatoire',
-    color: '#fed7aa',
-  },
-  {
     slug: 'hifdh-niveau3',
-    label: 'Tajwid par mémorisation - Niveau 3',
-    labelAr: 'فئة التجويد بالحفظ : المستوى الثالث',
-    description: 'Mémorisation avec tajwid - Niveau avancé',
+    label: 'Niveau 3',
+    labelAr: 'المستوى الثالث',
+    description: 'Niveau avancé',
     color: '#fecaca',
   },
   {
     slug: 'hifdh-niveau4',
-    label: 'Tajwid par mémorisation - Niveau 4',
-    labelAr: 'فئة التجويد بالحفظ : المستوى الرابع',
-    description: 'Mémorisation avec tajwid - Niveau expert',
+    label: 'Niveau 4',
+    labelAr: 'المستوى الرابع',
+    description: 'Niveau expert',
     color: '#e9d5ff',
+  },
+  {
+    slug: 'tilawa-niveau1',
+    label: 'Récitation - Niveau 1',
+    labelAr: 'التلاوة : المستوى الأول',
+    description: 'Récitation avec tajwid',
+    color: '#dbeafe',
+  },
+  {
+    slug: 'tilawa-niveau2',
+    label: 'Récitation - Niveau 2',
+    labelAr: 'التلاوة : المستوى الثاني',
+    description: 'Récitation niveau intermédiaire',
+    color: '#bfdbfe',
+  },
+  {
+    slug: 'tilawa-niveau3',
+    label: 'Récitation - Niveau 3',
+    labelAr: 'التلاوة : المستوى الثالث',
+    description: 'Récitation niveau avancé',
+    color: '#93c5fd',
   },
 ];
 

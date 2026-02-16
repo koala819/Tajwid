@@ -25,18 +25,45 @@ export async function getElevesByNiveau(creneau?: string) {
   return (data ?? []) as EleveRow[];
 }
 
-export async function getNiveauxWithEleves(creneau?: string) {
+export async function getNiveauxWithEleves(creneau?: string, qualificationFilter?: string) {
   const elevesFromDb = await getElevesByNiveau(creneau);
 
   const niveauxWithEleves = niveauxConfig.map((niveau) => {
     const elevesForNiveau = elevesFromDb
-      .filter((eleve) => eleve.niveau === niveau.slug)
+      .filter((eleve) => {
+        // Filtrer par niveau
+        if (eleve.niveau !== niveau.slug) return false;
+        
+        // Filtrer par qualification si spécifié
+        if (qualificationFilter && eleve.qualification !== qualificationFilter) return false;
+        
+        return true;
+      })
       .map((eleve) => ({
         id: eleve.id,
-        name: `${eleve.nom} ${eleve.prenom}`,
+        name: `${eleve.prenom} ${eleve.nom}`,
+        prenom: eleve.prenom,
+        nom: eleve.nom,
         slug: slugify(`${eleve.nom} ${eleve.prenom}`),
         professeur: eleve.professeur ?? undefined,
-      }));
+        moyenne_qualif: eleve.moyenne_qualif ?? undefined,
+        note1: eleve.note1 ?? undefined,
+        note2: eleve.note2 ?? undefined,
+        observation: eleve.observation ?? undefined,
+      }))
+      .sort((a, b) => {
+        // Si on filtre par qualification, trier par moyenne décroissante (classement)
+        if (qualificationFilter === 'qualifier') {
+          const moyenneA = a.moyenne_qualif ?? 0;
+          const moyenneB = b.moyenne_qualif ?? 0;
+          if (moyenneB !== moyenneA) {
+            return moyenneB - moyenneA;
+          }
+        }
+        
+        // Sinon, trier par prénom alphabétique
+        return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
+      });
 
     return {
       ...niveau,

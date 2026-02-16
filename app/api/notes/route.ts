@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getSupabaseClient } from '@/lib/supabase/client';
 
-const criteresCount = 10;
+const criteresCount = 13; // Nombre de critères de notation (sans les observations)
 
 type NotePayload = {
   niveau: string;
@@ -23,11 +23,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const scoreValues = Object.values(payload.scores ?? {});
+  // Extraire les observations et ne garder que les scores numériques
+  const { observations, ...scoresCriteres } = payload.scores ?? {};
+  const scoreValues = Object.values(scoresCriteres);
 
   if (scoreValues.length !== criteresCount || scoreValues.some((value) => typeof value !== 'number')) {
     return NextResponse.json(
-      { error: 'Les scores doivent contenir 10 valeurs numériques.' },
+      { error: `Les scores doivent contenir ${criteresCount} valeurs numériques.` },
       { status: 400 }
     );
   }

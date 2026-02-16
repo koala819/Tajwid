@@ -25,39 +25,37 @@ export default async function Page(props: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10 dark:bg-slate-950">
-      <div className="mx-auto max-w-5xl space-y-8 px-4">
+    <main className="min-h-screen bg-stone-50 py-12 dark:bg-neutral-900 md:py-16">
+      <div className="mx-auto max-w-4xl space-y-12 px-4">
         {/* Bouton retour */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-2 text-sm text-stone-500 transition-colors hover:text-amber-700 dark:text-stone-400 dark:hover:text-amber-500"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Retour aux participants
+          Retour
         </Link>
 
-        <header className="space-y-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-indigo-600">
+        <header className="space-y-4 border-b border-stone-200 pb-8 dark:border-neutral-700">
+          <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
             {niveauConfig.label}
           </p>
-          <p className="text-right text-sm font-semibold text-slate-700 dark:text-slate-300" dir="rtl">
+          <p className="text-right text-sm font-normal text-stone-600 dark:text-stone-300" dir="rtl">
             {niveauConfig.labelAr}
           </p>
-          <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">{eleve.name}</h1>
+          <h1 className="text-3xl font-normal tracking-tight text-stone-800 dark:text-stone-100 md:text-4xl">
+            {eleve.name}
+          </h1>
           {eleve.professeur && (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Professeur : {eleve.professeur}
+            <p className="text-sm text-stone-500 dark:text-stone-400">
+              {eleve.professeur}
             </p>
           )}
-          <p className="text-slate-500 dark:text-slate-300">
-            Chaque jury note l&apos;élève individuellement sur 10 critères. Les données sont envoyées
-            automatiquement depuis ce formulaire.
-          </p>
         </header>
 
-        <FormulaireNotes niveau={niveauConfig.label} eleve={eleve.name} />
+        <FormulaireNotes niveau={niveauConfig.slug} eleve={eleve.name} />
       </div>
     </main>
   );
