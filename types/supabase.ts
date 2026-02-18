@@ -52,6 +52,19 @@ export type EleveRow = {
   created_at: string;
 };
 
+export type EnseignantRow = {
+  id: string;
+  nom: string;
+  ordre: number;
+  login_username: string | null;
+};
+
+export type EnseignantInsert = {
+  nom: string;
+  ordre: number;
+  login_username?: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -64,6 +77,11 @@ export type Database = {
         Row: EleveRow;
         Insert: Omit<EleveRow, 'id' | 'created_at'>;
         Update: Partial<Omit<EleveRow, 'id' | 'created_at'>>;
+      };
+      enseignants: {
+        Row: EnseignantRow;
+        Insert: Omit<EnseignantRow, 'id'>;
+        Update: Partial<Omit<EnseignantRow, 'id'>>;
       };
     };
     Views: Record<string, never>;

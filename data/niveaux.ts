@@ -20,6 +20,8 @@ export type Eleve = {
   note1?: number;
   note2?: number;
   observation?: string;
+  qualification?: string;
+  competition?: string;
 };
 
 export type Niveau = {

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import { findNiveauConfig, slugify } from '@/data/niveaux';
-import { getElevesByNiveau } from '@/lib/eleves';
+import { findNiveauConfig } from '@/data/niveaux';
+import { getNiveauxWithEleves } from '@/lib/eleves';
+import { getEnseignantsPourNotes } from '@/lib/enseignants';
 import ClientNiveauEleves from './ClientNiveauEleves';
 
 export const dynamic = 'force-dynamic';
@@ -30,27 +31,13 @@ export default async function ElevesPage(props: PageProps) {
     notFound();
   }
 
-  // Charger les élèves du créneau et du niveau
-  const elevesFromDb = await getElevesByNiveau(creneau);
-  const elevesForNiveau = elevesFromDb
-    .filter((eleve) => eleve.niveau === niveauSlug)
-    .map((eleve) => ({
-      id: eleve.id,
-      prenom: eleve.prenom,
-      nom: eleve.nom,
-      name: `${eleve.prenom} ${eleve.nom}`,
-      slug: slugify(`${eleve.nom} ${eleve.prenom}`),
-      professeur: eleve.professeur,
-      moyenne_qualif: eleve.moyenne_qualif,
-    }))
-    .sort((a, b) => {
-      // Si on a des qualifiés avec notes, trier par moyenne décroissante
-      if (a.moyenne_qualif && b.moyenne_qualif) {
-        return b.moyenne_qualif - a.moyenne_qualif;
-      }
-      // Sinon trier par prénom
-      return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
-    });
+  const [niveauxWithEleves, enseignantsPourNotes] = await Promise.all([
+    getNiveauxWithEleves(creneau),
+    getEnseignantsPourNotes(),
+  ]);
+
+  const niveauData = niveauxWithEleves.find((n) => n.slug === niveauSlug);
+  const elevesForNiveau = niveauData?.eleves ?? [];
 
   return (
     <ClientNiveauEleves
@@ -58,6 +45,8 @@ export default async function ElevesPage(props: PageProps) {
       niveauSlug={niveauSlug}
       niveauConfig={niveauConfig}
       elevesForNiveau={elevesForNiveau}
+      enseignantNote1={enseignantsPourNotes.note1}
+      enseignantNote2={enseignantsPourNotes.note2}
     />
   );
 }

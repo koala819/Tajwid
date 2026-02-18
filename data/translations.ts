@@ -57,10 +57,17 @@ export const translations = {
     
     // Page résultats
     resultsTitle: 'Résultats de la demi-finale',
+    resultsQualifTitle: 'Résultats de qualification',
+    resultsQualifSubtitle: 'Concours de Tajwid 2025 - Phase de qualification',
     noPublishedResults: 'Aucun résultat publié pour le moment',
+    noQualifResults: 'Aucun résultat de qualification enregistré pour le moment',
     rank: 'Classement',
     student: 'Élève',
     score: 'Note',
+    note1: 'Note 1',
+    note2: 'Note 2',
+    moyenneQualif: 'Moyenne',
+    obsQualif: 'Statut',
     
     // Modal d'édition
     editNote: 'Modifier la note',
@@ -127,10 +134,17 @@ export const translations = {
     
     // Page résultats
     resultsTitle: 'نتائج نصف النهائي',
+    resultsQualifTitle: 'نتائج التصفيات',
+    resultsQualifSubtitle: 'مسابقة التجويد 2025 - مرحلة التصفيات',
     noPublishedResults: 'لا توجد نتائج منشورة في الوقت الحالي',
+    noQualifResults: 'لا توجد نتائج تصفيات مسجلة في الوقت الحالي',
     rank: 'الترتيب',
     student: 'الطالب',
     score: 'النقطة',
+    note1: 'النقطة 1',
+    note2: 'النقطة 2',
+    moyenneQualif: 'المعدل',
+    obsQualif: 'الحالة',
     
     // Modal d'édition
     editNote: 'تعديل النقطة',

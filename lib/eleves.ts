@@ -4,7 +4,7 @@ import { slugify, niveauxConfig } from '@/data/niveaux';
 
 export async function getElevesByNiveau(creneau?: string) {
   const supabaseClient = getSupabaseClient();
-  
+
   let query = supabaseClient
     .from('eleves')
     .select('*')
@@ -33,10 +33,10 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
       .filter((eleve) => {
         // Filtrer par niveau
         if (eleve.niveau !== niveau.slug) return false;
-        
+
         // Filtrer par qualification si spécifié
         if (qualificationFilter && eleve.qualification !== qualificationFilter) return false;
-        
+
         return true;
       })
       .map((eleve) => ({
@@ -50,17 +50,16 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
         note1: eleve.note1 ?? undefined,
         note2: eleve.note2 ?? undefined,
         observation: eleve.observation ?? undefined,
+        qualification: eleve.qualification ?? undefined,
+        competition: eleve.competition ?? undefined,
       }))
       .sort((a, b) => {
-        // Si on filtre par qualification, trier par moyenne décroissante (classement)
-        if (qualificationFilter === 'qualifier') {
-          const moyenneA = a.moyenne_qualif ?? 0;
-          const moyenneB = b.moyenne_qualif ?? 0;
-          if (moyenneB !== moyenneA) {
-            return moyenneB - moyenneA;
-          }
+        // Trier par moyenne décroissante quand des notes de qualification existent (classement)
+        const moyenneA = a.moyenne_qualif ?? 0;
+        const moyenneB = b.moyenne_qualif ?? 0;
+        if (moyenneB !== moyenneA) {
+          return moyenneB - moyenneA;
         }
-        
         // Sinon, trier par prénom alphabétique
         return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
       });
@@ -78,7 +77,7 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
 export async function findEleve(niveauSlug: string, eleveSlug: string) {
   const niveaux = await getNiveauxWithEleves();
   const niveau = niveaux.find((n) => n.slug === niveauSlug);
-  
+
   if (!niveau) {
     return undefined;
   }
