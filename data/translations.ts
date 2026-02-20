@@ -46,15 +46,18 @@ export const translations = {
     
     // Page admin
     adminTitle: 'Gestion des résultats',
+    adminSubtitle: 'Saisie des notes par les jurys, publication des classements.',
     noNotes: 'Aucune note enregistrée pour ce niveau',
     juries: 'jurys',
     jury: 'jury',
     waitingSecondJury: 'En attente du 2e jury',
     modify: 'Modifier',
+    details: 'Détails',
     detailNotes: 'Détail des notes',
     comments: 'Commentaires',
     published: 'Publié',
     hidden: 'Caché',
+    showOnResultsPage: 'Afficher sur la page des résultats',
     seePublicPage: 'Voir la page publique',
     
     // Page résultats
@@ -139,15 +142,18 @@ export const translations = {
     
     // Page admin
     adminTitle: 'إدارة النتائج',
+    adminSubtitle: 'إدخال النقاط من قبل الحكام ونشر الترتيب.',
     noNotes: 'لا توجد نقاط مسجلة لهذا المستوى',
     juries: 'حكام',
     jury: 'حكم',
     waitingSecondJury: 'في انتظار الحكم الثاني',
     modify: 'تعديل',
+    details: 'تفاصيل',
     detailNotes: 'تفاصيل النقاط',
     comments: 'التعليقات',
     published: 'منشور',
     hidden: 'مخفي',
+    showOnResultsPage: 'عرض على صفحة النتائج',
     seePublicPage: 'عرض الصفحة العامة',
     
     // Page résultats
