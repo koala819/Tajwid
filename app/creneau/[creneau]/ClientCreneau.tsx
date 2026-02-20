@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
-import LanguageSwitch from '@/components/LanguageSwitch';
 import type { Niveau } from '@/data/niveaux';
 
 type NiveauWithCount = Niveau & { count: number };
@@ -19,8 +18,7 @@ export default function ClientCreneau({ creneau, niveauxAvecComptage }: ClientCr
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-neutral-900">
       <main className="mx-auto max-w-2xl space-y-12 px-4 py-12 md:py-16">
-        {/* Bouton retour + switch langue */}
-        <div className="flex items-center justify-between">
+        <div>
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-sm text-stone-500 transition-colors hover:text-amber-700 dark:text-stone-400 dark:hover:text-amber-500"
@@ -30,7 +28,6 @@ export default function ClientCreneau({ creneau, niveauxAvecComptage }: ClientCr
             </svg>
             {t('back', lang)}
           </Link>
-          <LanguageSwitch />
         </div>
 
         {/* Header */}

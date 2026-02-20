@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { criteres } from '@/data/criteres';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
-import LanguageSwitch from '@/components/LanguageSwitch';
 
 type ScoreMap = Record<string, number>;
 
@@ -155,7 +154,6 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
             Distribution des points (Total 100 points)
           </p>
         </div>
-        <LanguageSwitch />
       </section>
 
       <form onSubmit={handleSubmit} className="space-y-8">

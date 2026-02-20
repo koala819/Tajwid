@@ -5,12 +5,14 @@ export const translations = {
     // Navigation et général
     home: 'Accueil',
     results: 'Voir les résultats',
-    admin: 'Administration',
+    admin: 'Gestion des notes',
     logout: 'Déconnexion',
     back: 'Retour',
     
     // Page d'accueil
     title: 'Concours de Tajwid - Demi-finale',
+    titleLine1: 'Concours de Tajwid',
+    titleLine2: 'Demi-finale',
     selectCreneau: 'Choisissez votre créneau',
     participants: 'participants',
     
@@ -96,12 +98,14 @@ export const translations = {
     // Navigation et général
     home: 'الرئيسية',
     results: 'عرض النتائج',
-    admin: 'الإدارة',
+    admin: 'إدارة النقاط',
     logout: 'تسجيل الخروج',
     back: 'رجوع',
     
     // Page d'accueil
     title: 'مسابقة التجويد - نصف النهائي',
+    titleLine1: 'مسابقة التجويد',
+    titleLine2: 'نصف النهائي',
     selectCreneau: 'اختر موعدك',
     participants: 'مشاركين',
     
