@@ -56,7 +56,7 @@ export async function getPublishedResultatsByPhase(
     acc[slug] = acc[slug] ?? [];
     acc[slug].push(note);
     return acc;
-  });
+  }, {});
 
   return niveauxConfig
     .filter((n) => n.slug.startsWith('hifdh-'))
