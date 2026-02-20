@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getSupabaseClient } from '@/lib/supabase/client';
+import { getConfig } from '@/lib/config';
 
 const criteresCount = 13; // Nombre de critères de notation (sans les observations)
 
@@ -34,6 +35,8 @@ export async function POST(request: Request) {
     );
   }
 
+  const phase = (await getConfig('phase_saisie')) || 'demi_finale';
+
   const insertPayload = {
     niveau: payload.niveau,
     eleve: payload.eleve,
@@ -42,6 +45,7 @@ export async function POST(request: Request) {
     total: payload.total,
     scores: payload.scores,
     recorded_at: new Date().toISOString(),
+    phase,
   };
 
   const supabaseClient = getSupabaseClient();

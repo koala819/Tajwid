@@ -9,6 +9,7 @@ export type NoteRow = {
   recorded_at: string;
   publie: boolean;
   date_publication: string | null;
+  phase: string | null;
 };
 
 export type NoteInsert = {
@@ -19,6 +20,7 @@ export type NoteInsert = {
   moyenne: number;
   scores: Record<string, number>;
   recorded_at?: string;
+  phase?: string | null;
 };
 
 export type NoteUpdate = {
@@ -31,6 +33,7 @@ export type NoteUpdate = {
   recorded_at?: string;
   publie?: boolean;
   date_publication?: string | null;
+  phase?: string | null;
 };
 
 export type EleveRow = {
@@ -65,9 +68,19 @@ export type EnseignantInsert = {
   login_username?: string | null;
 };
 
+export type ConfigRow = {
+  key: string;
+  value: string;
+};
+
 export type Database = {
   public: {
     Tables: {
+      config: {
+        Row: ConfigRow;
+        Insert: ConfigRow;
+        Update: Partial<ConfigRow>;
+      };
       notes: {
         Row: NoteRow;
         Insert: NoteInsert;

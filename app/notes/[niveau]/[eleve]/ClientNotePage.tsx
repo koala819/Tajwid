@@ -14,10 +14,18 @@ type Eleve = {
 type ClientNotePageProps = {
   niveauConfig: Niveau;
   eleve: Eleve;
+  phaseSaisie: string;
 };
 
-export default function ClientNotePage({ niveauConfig, eleve }: ClientNotePageProps) {
+const phaseToLabelKey: Record<string, string> = {
+  qualification: 'phaseQualification',
+  demi_finale: 'phaseDemiFinale',
+  finale: 'phaseFinale',
+};
+
+export default function ClientNotePage({ niveauConfig, eleve, phaseSaisie }: ClientNotePageProps) {
   const lang = useLanguage();
+  const phaseLabel = phaseSaisie ? t(phaseToLabelKey[phaseSaisie] as any, lang) : null;
 
   return (
     <main className="min-h-screen bg-stone-50 py-12 dark:bg-neutral-900 md:py-16">
@@ -54,6 +62,15 @@ export default function ClientNotePage({ niveauConfig, eleve }: ClientNotePagePr
           {eleve.professeur && (
             <p className="text-sm text-stone-500 dark:text-stone-400">
               {lang === 'ar' ? 'الأستاذ' : t('professor', lang)}: {eleve.professeur}
+            </p>
+          )}
+          {phaseLabel ? (
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-500">
+              {t('savingPhaseLabel', lang)} : {phaseLabel}
+            </p>
+          ) : (
+            <p className="text-sm text-stone-500 dark:text-stone-400">
+              {t('savingPhaseDefault', lang)}
             </p>
           )}
         </header>

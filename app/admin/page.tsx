@@ -2,6 +2,7 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
 import { niveauxConfig } from '@/data/niveaux';
 import { isAuthenticated } from '@/lib/auth';
+import { getConfig } from '@/lib/config';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
 import AdminHeader from '@/components/AdminHeader';
@@ -10,19 +11,23 @@ import AdminContent from './AdminContent';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  // Vérifier l'authentification
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     redirect('/login?redirect=/admin');
   }
-  const supabaseClient = getSupabaseClient();
-  
-  const { data, error } = await supabaseClient
-    .from('notes')
-    .select('*')
-    .order('recorded_at', { ascending: false });
+  const [phaseSaisie, supabaseResult] = await Promise.all([
+    getConfig('phase_saisie'),
+    getSupabaseClient().from('notes').select('*').order('recorded_at', { ascending: false }),
+  ]);
+  const currentPhase = phaseSaisie === 'finale' ? 'finale' : 'demi_finale';
 
-  const levelRows: NoteRow[] = data ?? [];
+  const allRows: NoteRow[] = supabaseResult.data ?? [];
+  const { error } = supabaseResult;
+
+  const levelRows: NoteRow[] = allRows.filter((row) => {
+    const p = row.phase ?? 'demi_finale';
+    return p === currentPhase;
+  });
 
   // Mapper les anciens labels vers les nouveaux slugs pour rétrocompatibilité
   const labelToSlug: Record<string, string> = {
