@@ -145,14 +145,17 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
 
   return (
     <div className="space-y-8 rounded-lg border border-stone-200 bg-white p-8 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
-      <section className="flex items-center justify-between border-b border-stone-200 pb-6 dark:border-neutral-700">
-        <div className="space-y-2">
-          <p className="text-right text-sm font-normal text-stone-700 dark:text-stone-200" dir="rtl">
-            توزيع النقاط لمسابقة التجويد (المجموع 100 نقطة)
-          </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400">
-            Distribution des points (Total 100 points)
-          </p>
+      <section className="border-b border-stone-200 pb-6 dark:border-neutral-700">
+        <div>
+          {lang === 'ar' ? (
+            <p className="text-right text-sm font-normal text-stone-700 dark:text-stone-200" dir="rtl">
+              توزيع النقاط لمسابقة التجويد (المجموع 100 نقطة)
+            </p>
+          ) : (
+            <p className="text-sm font-normal text-stone-700 dark:text-stone-200">
+              Distribution des points (Total 100 points)
+            </p>
+          )}
         </div>
       </section>
 
@@ -176,17 +179,14 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
                   </>
                 ) : (
                   <>
-                    <th className="p-3 text-right text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400" dir="rtl">
-                      المعايير
-                    </th>
                     <th className="p-3 text-left text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                      Critères
+                      {t('criteria', lang)}
                     </th>
                     <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                      Max
+                      {t('max', lang)}
                     </th>
                     <th className="p-3 text-center text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                      Note
+                      {t('note', lang)}
                     </th>
                   </>
                 )}
@@ -198,12 +198,15 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
                   key={critere.id}
                   className="border-b border-stone-100 dark:border-neutral-700"
                 >
-                  <td className="p-3 text-right text-sm font-normal text-stone-800 dark:text-stone-100" dir="rtl">
-                    {critere.label}
-                  </td>
-                  <td className="p-3 text-left text-xs text-stone-500 dark:text-stone-400">
-                    {critere.labelFr}
-                  </td>
+                  {lang === 'ar' ? (
+                    <td className="p-3 text-right text-sm font-normal text-stone-800 dark:text-stone-100" dir="rtl">
+                      {critere.label}
+                    </td>
+                  ) : (
+                    <td className="p-3 text-left text-sm font-normal text-stone-800 dark:text-stone-100">
+                      {critere.labelFr}
+                    </td>
+                  )}
                   <td className="p-3 text-center text-sm text-stone-600 dark:text-stone-300">
                     {critere.max}
                   </td>
@@ -222,12 +225,15 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
                 </tr>
               ))}
               <tr className="border-t-2 border-stone-200 dark:border-neutral-600">
-                <td className="p-4 text-right text-sm font-medium text-stone-800 dark:text-stone-100" dir="rtl">
-                  المجموع
-                </td>
-                <td className="p-4 text-left text-sm font-medium text-stone-800 dark:text-stone-100">
-                  TOTAL
-                </td>
+                {lang === 'ar' ? (
+                  <td className="p-4 text-right text-sm font-medium text-stone-800 dark:text-stone-100" dir="rtl">
+                    المجموع
+                  </td>
+                ) : (
+                  <td className="p-4 text-left text-sm font-medium text-stone-800 dark:text-stone-100">
+                    {t('total', lang)}
+                  </td>
+                )}
                 <td className="p-4 text-center text-sm text-stone-600 dark:text-stone-300">
                   100
                 </td>

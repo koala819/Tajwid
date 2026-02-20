@@ -47,14 +47,9 @@ export default function ClientNotePage({ niveauConfig, eleve, phaseSaisie }: Cli
               {niveauConfig.labelAr}
             </p>
           ) : (
-            <>
-              <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                {niveauConfig.label}
-              </p>
-              <p className="text-right text-sm font-normal text-stone-600 dark:text-stone-300" dir="rtl">
-                {niveauConfig.labelAr}
-              </p>
-            </>
+            <p className="text-base font-normal text-stone-600 dark:text-stone-300">
+              {niveauConfig.label}
+            </p>
           )}
           <h1 className="text-3xl font-normal tracking-tight text-stone-800 dark:text-stone-100 md:text-4xl">
             {eleve.name}

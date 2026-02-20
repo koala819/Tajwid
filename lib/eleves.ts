@@ -53,16 +53,7 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
         qualification: eleve.qualification ?? undefined,
         competition: eleve.competition ?? undefined,
       }))
-      .sort((a, b) => {
-        // Trier par moyenne décroissante quand des notes de qualification existent (classement)
-        const moyenneA = a.moyenne_qualif ?? 0;
-        const moyenneB = b.moyenne_qualif ?? 0;
-        if (moyenneB !== moyenneA) {
-          return moyenneB - moyenneA;
-        }
-        // Sinon, trier par prénom alphabétique
-        return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
-      });
+      .sort((a, b) => a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' }));
 
     return {
       ...niveau,

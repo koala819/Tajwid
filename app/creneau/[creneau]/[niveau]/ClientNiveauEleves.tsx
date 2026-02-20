@@ -48,14 +48,9 @@ export default function ClientNiveauEleves({
                 {niveauConfig.labelAr}
               </h1>
             ) : (
-              <>
-                <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  {t(creneau as any, lang)} · {niveauConfig.label}
-                </p>
-                <h1 className="text-right text-2xl font-normal text-stone-800 dark:text-stone-100 md:text-3xl" dir="rtl">
-                  {niveauConfig.labelAr}
-                </h1>
-              </>
+              <h1 className="text-2xl font-normal text-stone-800 dark:text-stone-100 md:text-3xl">
+                {t(creneau as any, lang)} · {niveauConfig.label}
+              </h1>
             )}
           </div>
           <div className="flex items-baseline gap-3">

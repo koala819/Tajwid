@@ -38,7 +38,7 @@ export default function ClientHome({ creneaux, totalParticipants }: ClientHomePr
             >
               <div className="flex items-center justify-between">
                 <span className="text-lg font-normal text-stone-800 dark:text-stone-100">
-                  {t(creneau.id as any, lang)}
+                  {t(creneau.id as keyof typeof t, lang)}
                 </span>
                 <svg
                   className="h-5 w-5 text-stone-400 transition-all group-hover:translate-x-1 group-hover:text-amber-600 dark:text-stone-500 dark:group-hover:text-amber-500"

@@ -61,14 +61,9 @@ export default function ClientCreneau({ creneau, niveauxAvecComptage }: ClientCr
                       {niveau.labelAr}
                     </p>
                   ) : (
-                    <>
-                      <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                        {niveau.label}
-                      </p>
-                      <p className="text-right text-base font-normal text-stone-800 dark:text-stone-100" dir="rtl">
-                        {niveau.labelAr}
-                      </p>
-                    </>
+                    <p className="text-base font-normal text-stone-800 dark:text-stone-100">
+                      {niveau.label}
+                    </p>
                   )}
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-stone-600 dark:text-stone-300">
