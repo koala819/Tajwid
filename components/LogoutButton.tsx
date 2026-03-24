@@ -46,12 +46,12 @@ export default function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={loading}
-      className="inline-flex items-center gap-2 text-sm text-stone-500 transition-colors hover:text-amber-700 disabled:cursor-wait disabled:opacity-50 dark:text-stone-400 dark:hover:text-amber-500"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-300 bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60 disabled:cursor-wait disabled:opacity-50 sm:w-auto dark:border-red-700 dark:bg-red-700 dark:hover:bg-red-600"
     >
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3H9m0 0l3-3m-3 3l3 3" />
       </svg>
-      {loading ? (lang === 'ar' ? 'إعادة التوجيه...' : 'Redirection...') : t('home', lang)}
+      {loading ? (lang === 'ar' ? 'إعادة التوجيه...' : 'Redirection...') : t('logout', lang)}
     </button>
   );
 }

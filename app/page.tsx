@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { getElevesByNiveau } from '@/lib/eleves';
 import { isAuthenticated } from '@/lib/auth';
 import ClientHome from './ClientHome';
@@ -13,15 +12,17 @@ const creneaux = [
 ];
 
 export default async function Home() {
-  // Vérifier l'authentification
   const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    redirect('/login?redirect=/');
-  }
 
   // Compter le total de participants
   const allEleves = await getElevesByNiveau();
   const totalParticipants = allEleves.length;
 
-  return <ClientHome creneaux={creneaux} totalParticipants={totalParticipants} />;
+  return (
+    <ClientHome
+      creneaux={creneaux}
+      totalParticipants={totalParticipants}
+      authenticated={authenticated}
+    />
+  );
 }

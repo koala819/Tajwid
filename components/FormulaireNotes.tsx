@@ -13,6 +13,17 @@ type FormulaireNotesProps = {
   eleve: string;
 };
 
+const JURY_OPTIONS = [
+  'Abderrahmane',
+  'Hanane H',
+  'Hanane A',
+  'Maya',
+  'Nisrine',
+  'Amina',
+  'Khairia',
+  'Noura',
+] as const;
+
 const defaultScores: ScoreMap = criteres.reduce((acc, critere) => {
   acc[critere.id] = 0;
   return acc;
@@ -34,7 +45,9 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
         const response = await fetch('/api/auth/user');
         if (response.ok) {
           const data = await response.json();
-          setJury(data.username);
+          if (JURY_OPTIONS.includes(data.username)) {
+            setJury(data.username);
+          }
         }
       } catch (error) {
         console.error('Erreur lors de la récupération du nom d\'utilisateur', error);
@@ -65,7 +78,7 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
     event.preventDefault();
 
     if (!jury) {
-      setMessage('Erreur: Nom du jury non trouvé. Veuillez vous reconnecter.');
+      setMessage(lang === 'ar' ? 'المرجو اختيار اسم الحكم.' : 'Veuillez sélectionner un nom de jury.');
       return;
     }
 
@@ -262,15 +275,30 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
           </label>
         </div>
 
-        {/* Affichage du jury connecté */}
-        {jury && (
-          <div className="rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-700">
-            <p className="text-xs uppercase tracking-wider text-stone-500 dark:text-stone-400">
+        {/* Sélection du jury */}
+        <div className="space-y-2">
+          <label className="flex flex-col gap-2">
+            <span className={`text-xs font-normal uppercase tracking-wider text-stone-500 dark:text-stone-400 ${lang === 'ar' ? 'text-right' : ''}`} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
               {lang === 'ar' ? 'الحكم' : 'Jury'}
-            </p>
-            <p className="mt-1 text-sm font-medium text-stone-800 dark:text-stone-100">{jury}</p>
-          </div>
-        )}
+            </span>
+            <select
+              value={jury}
+              onChange={(event) => setJury(event.target.value)}
+              className="w-full rounded border border-stone-300 bg-stone-50 px-4 py-3 text-sm font-normal text-stone-800 outline-none transition focus:border-amber-500 focus:bg-white dark:border-neutral-600 dark:bg-neutral-700 dark:text-stone-100 dark:focus:border-amber-500"
+              required
+              dir={lang === 'ar' ? 'rtl' : 'ltr'}
+            >
+              <option value="">
+                {lang === 'ar' ? 'اختر الحكم' : 'Choisir le jury'}
+              </option>
+              {JURY_OPTIONS.map((juryName) => (
+                <option key={juryName} value={juryName}>
+                  {juryName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
 
         {status === 'error' && message && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-normal text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">

@@ -23,7 +23,7 @@ export default function LanguageSwitch() {
   return (
     <button
       onClick={toggleLang}
-      className="inline-flex items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 sm:w-auto dark:border-neutral-600 dark:bg-neutral-800 dark:text-stone-200 dark:hover:bg-neutral-700"
       aria-label="Changer de langue"
     >
       <span>{lang === 'fr' ? '🇫🇷 FR' : '🇸🇦 AR'}</span>

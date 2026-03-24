@@ -102,7 +102,6 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
             <div className="space-y-2 md:space-y-0 md:rounded-lg md:border md:border-stone-200 md:bg-white md:dark:border-neutral-700 md:dark:bg-neutral-800 overflow-hidden">
               {Object.entries(groupedByEleve).map(([eleveNom, notes]) => {
                 const moyenne = notes.reduce((sum, n) => sum + n.total, 0) / notes.length;
-                const hasEnoughJuries = notes.length >= 2;
 
                 return (
                   <div
@@ -112,41 +111,24 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
                     <h3 className="min-w-0 flex-1 truncate text-lg font-normal text-stone-800 dark:text-stone-100">
                       {eleveNom}
                     </h3>
-                    {hasEnoughJuries ? (
-                      <>
-                        <p className="shrink-0 tabular-nums text-2xl font-normal text-amber-700 dark:text-amber-500">
-                          {moyenne.toFixed(1)}
-                          <span className="text-base font-normal text-stone-500 dark:text-stone-400"> {lang === 'ar' ? '/ ١٠٠' : '/ 100'}</span>
-                        </p>
-                        <div className="flex shrink-0 items-center gap-4">
-                          <PublishToggle
-                            notes={notes}
-                            eleveNom={eleveNom}
-                            moyenneFinale={moyenne}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setDetailsForEleve(eleveNom)}
-                            className="shrink-0 text-sm font-medium text-amber-700 underline decoration-amber-700/50 underline-offset-2 hover:decoration-amber-700 dark:text-amber-500 dark:decoration-amber-500/50 dark:hover:decoration-amber-500"
-                          >
-                            {t('details', lang)}
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex shrink-0 flex-wrap items-center gap-3 md:ml-auto">
-                        <span className="rounded-full bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                          {t('waitingSecondJury', lang)}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setDetailsForEleve(eleveNom)}
-                          className="text-sm font-medium text-amber-700 underline decoration-amber-700/50 underline-offset-2 hover:decoration-amber-700 dark:text-amber-500 dark:decoration-amber-500/50 dark:hover:decoration-amber-500"
-                        >
-                          {t('details', lang)}
-                        </button>
-                      </div>
-                    )}
+                    <p className="shrink-0 tabular-nums text-2xl font-normal text-amber-700 dark:text-amber-500">
+                      {moyenne.toFixed(1)}
+                      <span className="text-base font-normal text-stone-500 dark:text-stone-400"> {lang === 'ar' ? '/ ١٠٠' : '/ 100'}</span>
+                    </p>
+                    <div className="flex shrink-0 items-center gap-4">
+                      <PublishToggle
+                        notes={notes}
+                        eleveNom={eleveNom}
+                        moyenneFinale={moyenne}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setDetailsForEleve(eleveNom)}
+                        className="shrink-0 text-sm font-medium text-amber-700 underline decoration-amber-700/50 underline-offset-2 hover:decoration-amber-700 dark:text-amber-500 dark:decoration-amber-500/50 dark:hover:decoration-amber-500"
+                      >
+                        {t('details', lang)}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
