@@ -2,6 +2,13 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import type { EleveRow } from '@/types/supabase';
 import { slugify, niveauxConfig } from '@/data/niveaux';
 
+const creneauSlugToLabel: Record<string, string> = {
+  'samedi-matin': 'Samedi matin',
+  'samedi-aprem': 'Samedi après-midi',
+  'dimanche-matin': 'Dimanche matin',
+  'dimanche-aprem': 'Dimanche après-midi',
+};
+
 export async function getElevesByNiveau(creneau?: string) {
   const supabaseClient = getSupabaseClient();
 
@@ -12,7 +19,12 @@ export async function getElevesByNiveau(creneau?: string) {
 
   // Filtrer par créneau si spécifié
   if (creneau) {
-    query = query.eq('creneau', creneau);
+    const creneauVariants = [creneau];
+    const creneauLabel = creneauSlugToLabel[creneau];
+    if (creneauLabel) {
+      creneauVariants.push(creneauLabel);
+    }
+    query = query.in('creneau', creneauVariants);
   }
 
   const { data, error } = await query;

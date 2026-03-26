@@ -35,6 +35,13 @@ export type Niveau = {
 // Configuration des niveaux (labels, couleurs, descriptions)
 export const niveauxConfig: Niveau[] = [
   {
+    slug: 'nourania',
+    label: 'Nourania',
+    labelAr: 'النورانية',
+    description: 'Niveau Nourania',
+    color: '#fde68a',
+  },
+  {
     slug: 'hifdh-preparatoire',
     label: 'Niveau préparatoire',
     labelAr: 'المستوى التحضيري',
