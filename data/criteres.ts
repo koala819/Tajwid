@@ -1,5 +1,5 @@
 // Critères officiels du concours de Tajwid avec pondérations (total 100 points)
-// Groupes : [lahn + huruf + tafkhim = 30], [qalqala + iqlab = 5], hifdh = 30, autres = 5 chacun
+// Mémorisation (hifdh) : 25 ; Iqlab et Qalqala : 5 chacun
 export const criteres = [
   { id: 'itidal', label: 'اعتدال التلاوة', labelFr: 'Modération de la récitation', max: 5 },
   { id: 'thiqah', label: 'صحة التشكيل وثقة القارئ', labelFr: 'Précision et confiance', max: 5 },
@@ -11,9 +11,9 @@ export const criteres = [
   { id: 'nun_tanwin', label: 'تطبيق أحكام النون الساكنة والتنوين', labelFr: 'Noun Sakin et Tanwin', max: 5 },
   { id: 'mim_sakin', label: 'تطبيق أحكام الميم الساكنة', labelFr: 'Mim Sakin', max: 5 },
   { id: 'nun_mim', label: 'تطبيق أحكام النون والميم المشددتين', labelFr: 'Noun et Mim accentués', max: 5 },
-  { id: 'iqlab', label: 'الإقلاب', labelFr: 'Iqlab', max: 2 },
-  { id: 'qalqala', label: 'القلقلة', labelFr: 'Qalqala', max: 3 },
-  { id: 'hifdh', label: 'الحفظ', labelFr: 'Mémorisation', max: 30 },
+  { id: 'iqlab', label: 'الإقلاب', labelFr: 'Iqlab', max: 5 },
+  { id: 'qalqala', label: 'القلقلة', labelFr: 'Qalqala', max: 5 },
+  { id: 'hifdh', label: 'الحفظ', labelFr: 'Mémorisation', max: 25 },
 ];
 
 // Map pour retrouver un critère par son ID
