@@ -97,6 +97,13 @@ export const niveauxConfig: Niveau[] = [
     description: 'Récitation niveau avancé',
     color: '#93c5fd',
   },
+  {
+    slug: 'recitation-avec-coran',
+    label: 'Récitation avec Coran',
+    labelAr: 'التلاوة بالمصحف',
+    description: 'Récitation avec support du Coran',
+    color: '#bbf7d0',
+  },
 ];
 
 export const findNiveauConfig = (niveauSlug: string) =>
