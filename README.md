@@ -64,7 +64,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000)
 **Via l'interface Supabase** :
 1. Table Editor → `eleves` → Insert row
 2. Remplissez :
-   - `niveau` : `hifdh-niveau2` (voir la liste dans `docs/GESTION-ELEVES.md`)
+  - `niveau` : `niveau2`
    - `nom` : `DUPONT`
    - `prenom` : `Marie`
    - `professeur` : `Mme MARTIN`
@@ -73,7 +73,7 @@ Ouvrez [http://localhost:3000](http://localhost:3000)
 **Via SQL** :
 ```sql
 INSERT INTO eleves (niveau, nom, prenom, professeur)
-VALUES ('hifdh-niveau2', 'DUPONT', 'Marie', 'Mme MARTIN');
+VALUES ('niveau2', 'DUPONT', 'Marie', 'Mme MARTIN');
 ```
 
 L'élève apparaît immédiatement sur le site !

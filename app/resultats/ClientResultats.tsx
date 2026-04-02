@@ -22,7 +22,7 @@ type ClientResultatsProps = {
 
 type PhaseTab = 'qualification' | 'demi_finale' | 'finale';
 
-const niveauxHifdh = niveauxConfig.filter((n) => n.slug.startsWith('hifdh-'));
+const niveauxHifdh = niveauxConfig.filter((n) => n.isHifdh);
 
 export default function ClientResultats({
   niveauxWithEleves,

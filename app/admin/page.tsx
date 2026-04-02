@@ -35,24 +35,24 @@ export default async function AdminPage() {
     'Tajwid par récitation - Niveau 1': 'tilawa-niveau1',
     'Tajwid par récitation - Niveau 2': 'tilawa-niveau2',
     'Tajwid par récitation - Niveau 3': 'tilawa-niveau3',
-    'Tajwid par mémorisation - Niveau 1': 'hifdh-niveau1',
-    'Tajwid par mémorisation - Niveau 2': 'hifdh-niveau2',
-    'Tajwid par mémorisation - Niveau 3': 'hifdh-niveau3',
-    'Tajwid par mémorisation - Niveau 4': 'hifdh-niveau4',
-    'Tajwid par mémorisation - Niveau préparatoire': 'hifdh-preparatoire',
+    'Tajwid par mémorisation - Niveau 1': 'niveau1',
+    'Tajwid par mémorisation - Niveau 2': 'niveau2',
+    'Tajwid par mémorisation - Niveau 3': 'niveau3',
+    'Tajwid par mémorisation - Niveau 4': 'niveau4',
+    'Tajwid par mémorisation - Niveau préparatoire': 'preparatoire',
     // Nouveaux labels courts
-    'Niveau préparatoire': 'hifdh-preparatoire',
-    'Niveau 1': 'hifdh-niveau1',
-    'Niveau 2': 'hifdh-niveau2',
-    'Niveau 3': 'hifdh-niveau3',
-    'Niveau 4': 'hifdh-niveau4',
+    'Niveau préparatoire': 'preparatoire',
+    'Niveau 1': 'niveau1',
+    'Niveau 2': 'niveau2',
+    'Niveau 3': 'niveau3',
+    'Niveau 4': 'niveau4',
     'Récitation - Niveau 1': 'tilawa-niveau1',
     'Récitation - Niveau 2': 'tilawa-niveau2',
     'Récitation - Niveau 3': 'tilawa-niveau3',
   };
 
   const grouped = levelRows.reduce<Record<string, NoteRow[]>>((acc, row) => {
-    // Convertir l'ancien label en slug si nécessaire
+    // Convertir d'éventuels anciens labels en slugs actuels
     const niveauKey = labelToSlug[row.niveau] ?? row.niveau;
     acc[niveauKey] = acc[niveauKey] ?? [];
     acc[niveauKey].push(row);
@@ -62,7 +62,7 @@ export default async function AdminPage() {
   // Pour la demi-finale, ne garder que les niveaux de mémorisation (hifdh)
   // et uniquement ceux qui ont des notes
   const niveauxHifdh = niveauxConfig
-    .filter((niveau) => niveau.slug.startsWith('hifdh-'))
+    .filter((niveau) => niveau.isHifdh)
     .filter((niveau) => grouped[niveau.slug]?.length > 0);
 
   return (

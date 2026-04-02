@@ -6,16 +6,16 @@ const labelToSlug: Record<string, string> = {
   'Tajwid par récitation - Niveau 1': 'tilawa-niveau1',
   'Tajwid par récitation - Niveau 2': 'tilawa-niveau2',
   'Tajwid par récitation - Niveau 3': 'tilawa-niveau3',
-  'Tajwid par mémorisation - Niveau 1': 'hifdh-niveau1',
-  'Tajwid par mémorisation - Niveau 2': 'hifdh-niveau2',
-  'Tajwid par mémorisation - Niveau 3': 'hifdh-niveau3',
-  'Tajwid par mémorisation - Niveau 4': 'hifdh-niveau4',
-  'Tajwid par mémorisation - Niveau préparatoire': 'hifdh-preparatoire',
-  'Niveau préparatoire': 'hifdh-preparatoire',
-  'Niveau 1': 'hifdh-niveau1',
-  'Niveau 2': 'hifdh-niveau2',
-  'Niveau 3': 'hifdh-niveau3',
-  'Niveau 4': 'hifdh-niveau4',
+  'Tajwid par mémorisation - Niveau 1': 'niveau1',
+  'Tajwid par mémorisation - Niveau 2': 'niveau2',
+  'Tajwid par mémorisation - Niveau 3': 'niveau3',
+  'Tajwid par mémorisation - Niveau 4': 'niveau4',
+  'Tajwid par mémorisation - Niveau préparatoire': 'preparatoire',
+  'Niveau préparatoire': 'preparatoire',
+  'Niveau 1': 'niveau1',
+  'Niveau 2': 'niveau2',
+  'Niveau 3': 'niveau3',
+  'Niveau 4': 'niveau4',
   'Récitation - Niveau 1': 'tilawa-niveau1',
   'Récitation - Niveau 2': 'tilawa-niveau2',
   'Récitation - Niveau 3': 'tilawa-niveau3',
@@ -52,14 +52,14 @@ export async function getPublishedResultatsByPhase(
       : notesRaw.filter((n) => n.phase !== 'finale');
 
   const byNiveau = notes.reduce<Record<string, NoteRow[]>>((acc, note) => {
-    const slug = labelToSlug[note.niveau] ?? note.niveau;
-    acc[slug] = acc[slug] ?? [];
-    acc[slug].push(note);
+    const rawSlug = labelToSlug[note.niveau] ?? note.niveau;
+    acc[rawSlug] = acc[rawSlug] ?? [];
+    acc[rawSlug].push(note);
     return acc;
   }, {});
 
   return niveauxConfig
-    .filter((n) => n.slug.startsWith('hifdh-'))
+    .filter((n) => n.isHifdh)
     .map((niveau) => {
       const niveauNotes = byNiveau[niveau.slug] ?? [];
       const byEleve = niveauNotes.reduce<Record<string, NoteRow[]>>((acc, note) => {

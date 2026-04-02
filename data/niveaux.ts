@@ -1,6 +1,9 @@
 // Ce fichier contient la configuration statique des niveaux
 // Les élèves sont maintenant chargés dynamiquement depuis Supabase
 
+// (migration) On ne normalise plus de slugs historiques, car la base
+// ne contient plus de valeurs héritées.
+
 const slugify = (value: string) =>
   value
     .toLowerCase()
@@ -30,6 +33,7 @@ export type Niveau = {
   labelAr: string;
   description: string;
   color: string;
+  isHifdh?: boolean;
 };
 
 // Configuration des niveaux (labels, couleurs, descriptions)
@@ -42,39 +46,44 @@ export const niveauxConfig: Niveau[] = [
     color: '#fde68a',
   },
   {
-    slug: 'hifdh-preparatoire',
+    slug: 'preparatoire',
     label: 'Niveau préparatoire',
     labelAr: 'المستوى التحضيري',
     description: 'Niveau préparatoire (6-10 ans)',
     color: '#fed7aa',
+    isHifdh: true,
   },
   {
-    slug: 'hifdh-niveau1',
+    slug: 'niveau1',
     label: 'Niveau 1',
     labelAr: 'المستوى الأول',
     description: 'Niveau débutant',
     color: '#dcfce7',
+    isHifdh: true,
   },
   {
-    slug: 'hifdh-niveau2',
+    slug: 'niveau2',
     label: 'Niveau 2',
     labelAr: 'المستوى الثاني',
     description: 'Niveau intermédiaire',
     color: '#fef3c7',
+    isHifdh: true,
   },
   {
-    slug: 'hifdh-niveau3',
+    slug: 'niveau3',
     label: 'Niveau 3',
     labelAr: 'المستوى الثالث',
     description: 'Niveau avancé',
     color: '#fecaca',
+    isHifdh: true,
   },
   {
-    slug: 'hifdh-niveau4',
+    slug: 'niveau4',
     label: 'Niveau 4',
     labelAr: 'المستوى الرابع',
     description: 'Niveau expert',
     color: '#e9d5ff',
+    isHifdh: true,
   },
   {
     slug: 'tilawa-niveau1',
@@ -107,6 +116,8 @@ export const niveauxConfig: Niveau[] = [
 ];
 
 export const findNiveauConfig = (niveauSlug: string) =>
-  niveauxConfig.find((niveau) => niveau.slug === niveauSlug);
+  niveauxConfig.find(
+    (niveau) => niveau.slug === niveauSlug,
+  );
 
 export { slugify };
