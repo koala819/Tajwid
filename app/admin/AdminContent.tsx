@@ -58,6 +58,16 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
     return acc;
   }, {});
 
+  const elevesSorted = Object.entries(groupedByEleve)
+    .map(([eleveNom, notes]) => {
+      const moyenne = notes.reduce((sum, n) => sum + n.total, 0) / notes.length;
+      return { eleveNom, notes, moyenne };
+    })
+    .sort((a, b) => {
+      if (b.moyenne !== a.moyenne) return b.moyenne - a.moyenne;
+      return a.eleveNom.localeCompare(b.eleveNom, 'fr', { sensitivity: 'base' });
+    });
+
   return (
     <>
       {/* Onglets des niveaux */}
@@ -100,9 +110,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
             </div>
           ) : (
             <div className="space-y-2 md:space-y-0 md:rounded-lg md:border md:border-stone-200 md:bg-white md:dark:border-neutral-700 md:dark:bg-neutral-800 overflow-hidden">
-              {Object.entries(groupedByEleve).map(([eleveNom, notes]) => {
-                const moyenne = notes.reduce((sum, n) => sum + n.total, 0) / notes.length;
-
+              {elevesSorted.map(({ eleveNom, notes, moyenne }) => {
                 return (
                   <div
                     key={eleveNom}
