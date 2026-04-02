@@ -7,6 +7,7 @@ import FormulaireNotes from '@/components/FormulaireNotes';
 import type { Niveau } from '@/data/niveaux';
 
 type Eleve = {
+  id: string;
   name: string;
   professeur?: string;
 };
@@ -70,7 +71,7 @@ export default function ClientNotePage({ niveauConfig, eleve, phaseSaisie }: Cli
           )}
         </header>
 
-        <FormulaireNotes niveau={niveauConfig.slug} eleve={eleve.name} />
+        <FormulaireNotes eleveId={eleve.id} />
       </div>
     </main>
   );

@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
 import { niveauxConfig } from '@/data/niveaux';
+import { NOTES_SELECT_WITH_ELEVE, noteEleveDisplayName } from '@/lib/noteHelpers';
 
 const labelToSlug: Record<string, string> = {
   'Tajwid par récitation - Niveau 1': 'tilawa-niveau1',
@@ -38,7 +39,7 @@ export async function getPublishedResultatsByPhase(
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
     .from('notes')
-    .select('*')
+    .select(NOTES_SELECT_WITH_ELEVE)
     .eq('publie', true)
     .or(`phase.eq.${phase},phase.is.null`)
     .order('total', { ascending: false });
@@ -52,7 +53,8 @@ export async function getPublishedResultatsByPhase(
       : notesRaw.filter((n) => n.phase !== 'finale');
 
   const byNiveau = notes.reduce<Record<string, NoteRow[]>>((acc, note) => {
-    const rawSlug = labelToSlug[note.niveau] ?? note.niveau;
+    const slugNiveau = note.eleves?.niveau ?? '';
+    const rawSlug = labelToSlug[slugNiveau] ?? slugNiveau;
     acc[rawSlug] = acc[rawSlug] ?? [];
     acc[rawSlug].push(note);
     return acc;
@@ -63,19 +65,20 @@ export async function getPublishedResultatsByPhase(
     .map((niveau) => {
       const niveauNotes = byNiveau[niveau.slug] ?? [];
       const byEleve = niveauNotes.reduce<Record<string, NoteRow[]>>((acc, note) => {
-        acc[note.eleve] = acc[note.eleve] ?? [];
-        acc[note.eleve].push(note);
+        const key = note.eleve_id;
+        acc[key] = acc[key] ?? [];
+        acc[key].push(note);
         return acc;
       }, {});
 
       const resultats: ResultatPhase[] = Object.entries(byEleve)
         .filter(([, eleveNotes]) => eleveNotes.length >= 2)
-        .map(([eleveNom, eleveNotes]) => {
+        .map(([, eleveNotes]) => {
           const moyenne =
             eleveNotes.reduce((s, n) => s + n.total, 0) / eleveNotes.length;
           return {
             niveau: niveau.slug,
-            eleve: eleveNom,
+            eleve: noteEleveDisplayName(eleveNotes[0]),
             moyenne,
             nbJurys: eleveNotes.length,
           };

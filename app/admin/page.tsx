@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
 import AdminHeader from '@/components/AdminHeader';
 import AdminContent from './AdminContent';
+import { NOTES_SELECT_WITH_ELEVE } from '@/lib/noteHelpers';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,10 @@ export default async function AdminPage() {
   }
   const [phaseSaisie, supabaseResult] = await Promise.all([
     getConfig('phase_saisie'),
-    getSupabaseClient().from('notes').select('*').order('recorded_at', { ascending: false }),
+    getSupabaseClient()
+      .from('notes')
+      .select(NOTES_SELECT_WITH_ELEVE)
+      .order('recorded_at', { ascending: false }),
   ]);
   const currentPhase = phaseSaisie === 'finale' ? 'finale' : 'demi_finale';
 
@@ -53,7 +57,8 @@ export default async function AdminPage() {
 
   const grouped = levelRows.reduce<Record<string, NoteRow[]>>((acc, row) => {
     // Convertir d'éventuels anciens labels en slugs actuels
-    const niveauKey = labelToSlug[row.niveau] ?? row.niveau;
+    const slugNiveau = row.eleves?.niveau ?? '';
+    const niveauKey = labelToSlug[slugNiveau] ?? slugNiveau;
     acc[niveauKey] = acc[niveauKey] ?? [];
     acc[niveauKey].push(row);
     return acc;

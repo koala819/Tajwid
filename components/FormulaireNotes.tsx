@@ -9,8 +9,7 @@ import { t } from '@/data/translations';
 type ScoreMap = Record<string, number>;
 
 type FormulaireNotesProps = {
-  niveau: string;
-  eleve: string;
+  eleveId: string;
 };
 
 const JURY_OPTIONS = [
@@ -29,7 +28,7 @@ const defaultScores: ScoreMap = criteres.reduce((acc, critere) => {
   return acc;
 }, {} as ScoreMap);
 
-export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps) {
+export default function FormulaireNotes({ eleveId }: FormulaireNotesProps) {
   const [scores, setScores] = useState<ScoreMap>(defaultScores);
   const [jury, setJury] = useState('');
   const [observations, setObservations] = useState('');
@@ -91,8 +90,7 @@ export default function FormulaireNotes({ niveau, eleve }: FormulaireNotesProps)
     setMessage(null);
 
     const payload = {
-      niveau,
-      eleve,
+      eleve_id: eleveId,
       jury: jury.trim(),
       moyenne: Number((total / 10).toFixed(2)), // Moyenne sur 10 pour compatibilité
       total,

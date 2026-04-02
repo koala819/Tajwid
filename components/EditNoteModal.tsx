@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { NoteRow } from '@/types/supabase';
+import { noteEleveDisplayName } from '@/lib/noteHelpers';
 
 type EditNoteModalProps = {
   note: NoteRow;
@@ -97,7 +98,7 @@ export default function EditNoteModal({ note, onClose, onSuccess }: EditNoteModa
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div className="space-y-2">
               <p className="text-sm text-stone-600 dark:text-stone-300">
-                Élève : <span className="font-medium">{note.eleve}</span>
+                Élève : <span className="font-medium">{noteEleveDisplayName(note)}</span>
               </p>
               <p className="text-sm text-stone-600 dark:text-stone-300">
                 Jury : <span className="font-medium">{note.jury}</span>
@@ -138,7 +139,7 @@ export default function EditNoteModal({ note, onClose, onSuccess }: EditNoteModa
           <div className="space-y-6">
             <div className="space-y-2">
               <p className="text-sm text-stone-600 dark:text-stone-300">
-                Élève : <span className="font-medium">{note.eleve}</span>
+                Élève : <span className="font-medium">{noteEleveDisplayName(note)}</span>
               </p>
               <p className="text-sm text-stone-600 dark:text-stone-300">
                 Jury : <span className="font-medium">{note.jury}</span>

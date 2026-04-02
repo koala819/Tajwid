@@ -6,8 +6,7 @@ import { getConfig } from '@/lib/config';
 const criteresCount = 13; // Nombre de critères de notation (sans les observations)
 
 type NotePayload = {
-  niveau: string;
-  eleve: string;
+  eleve_id: string;
   jury: string;
   total: number;
   moyenne: number;
@@ -17,9 +16,9 @@ type NotePayload = {
 export async function POST(request: Request) {
   const payload: NotePayload = await request.json();
 
-  if (!payload.niveau || !payload.eleve || !payload.jury) {
+  if (!payload.eleve_id || !payload.jury) {
     return NextResponse.json(
-      { error: 'Niveau, élève et jury sont requis.' },
+      { error: 'eleve_id et jury sont requis.' },
       { status: 400 }
     );
   }
@@ -38,8 +37,7 @@ export async function POST(request: Request) {
   const phase = (await getConfig('phase_saisie')) || 'demi_finale';
 
   const insertPayload = {
-    niveau: payload.niveau,
-    eleve: payload.eleve,
+    eleve_id: payload.eleve_id,
     jury: payload.jury,
     moyenne: payload.moyenne,
     total: payload.total,

@@ -7,6 +7,7 @@ import { criteresMap } from '@/data/criteres';
 import { t, type Language } from '@/data/translations';
 import EditNoteModal from '@/components/EditNoteModal';
 import PublishToggle from '@/components/PublishToggle';
+import { noteEleveDisplayName } from '@/lib/noteHelpers';
 
 type AdminContentProps = {
   niveaux: Niveau[];
@@ -19,7 +20,7 @@ const formatDate = (value?: string | null) =>
 export default function AdminContent({ niveaux, notesGrouped }: AdminContentProps) {
   const [selectedNiveau, setSelectedNiveau] = useState<string>(niveaux[0]?.slug || '');
   const [editingNote, setEditingNote] = useState<NoteRow | null>(null);
-  const [detailsForEleve, setDetailsForEleve] = useState<string | null>(null);
+  const [detailsForEleveId, setDetailsForEleveId] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('fr');
 
   // Charger la préférence de langue depuis localStorage
@@ -53,15 +54,16 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
 
   // Grouper par élève
   const groupedByEleve = notesForNiveau.reduce<Record<string, NoteRow[]>>((acc, note) => {
-    acc[note.eleve] = acc[note.eleve] ?? [];
-    acc[note.eleve].push(note);
+    acc[note.eleve_id] = acc[note.eleve_id] ?? [];
+    acc[note.eleve_id].push(note);
     return acc;
   }, {});
 
   const elevesSorted = Object.entries(groupedByEleve)
-    .map(([eleveNom, notes]) => {
+    .map(([eleveId, notes]) => {
       const moyenne = notes.reduce((sum, n) => sum + n.total, 0) / notes.length;
-      return { eleveNom, notes, moyenne };
+      const eleveNom = noteEleveDisplayName(notes[0]);
+      return { eleveId, eleveNom, notes, moyenne };
     })
     .sort((a, b) => {
       if (b.moyenne !== a.moyenne) return b.moyenne - a.moyenne;
@@ -75,7 +77,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
         <div className="flex gap-1">
           {niveaux.map((niveau) => {
             const notes = notesGrouped[niveau.slug] ?? [];
-            const count = new Set(notes.map((n) => n.eleve)).size;
+            const count = new Set(notes.map((n) => n.eleve_id)).size;
             return (
               <button
                 key={niveau.slug}
@@ -110,10 +112,10 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
             </div>
           ) : (
             <div className="space-y-2 md:space-y-0 md:rounded-lg md:border md:border-stone-200 md:bg-white md:dark:border-neutral-700 md:dark:bg-neutral-800 overflow-hidden">
-              {elevesSorted.map(({ eleveNom, notes, moyenne }) => {
+              {elevesSorted.map(({ eleveId, eleveNom, notes, moyenne }) => {
                 return (
                   <div
-                    key={eleveNom}
+                    key={eleveId}
                     className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800 md:flex-row md:items-center md:gap-6 md:rounded-none md:border-0 md:border-b md:border-stone-200 md:bg-transparent md:p-4 md:dark:border-neutral-700 md:dark:bg-transparent last:md:border-b-0"
                   >
                     <h3 className="min-w-0 flex-1 truncate text-lg font-normal text-stone-800 dark:text-stone-100">
@@ -131,7 +133,7 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
                       />
                       <button
                         type="button"
-                        onClick={() => setDetailsForEleve(eleveNom)}
+                        onClick={() => setDetailsForEleveId(eleveId)}
                         className="shrink-0 text-sm font-medium text-amber-700 underline decoration-amber-700/50 underline-offset-2 hover:decoration-amber-700 dark:text-amber-500 dark:decoration-amber-500/50 dark:hover:decoration-amber-500"
                       >
                         {t('details', lang)}
@@ -146,8 +148,9 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
       )}
 
       {/* Modal Détails (détail par jury) */}
-      {detailsForEleve && (() => {
-        const notes = groupedByEleve[detailsForEleve] ?? [];
+      {detailsForEleveId && (() => {
+        const notes = groupedByEleve[detailsForEleveId] ?? [];
+        const titreEleve = notes[0] ? noteEleveDisplayName(notes[0]) : '';
         return (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -157,17 +160,17 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
           >
             <div
               className="absolute inset-0 bg-stone-900/60 dark:bg-neutral-950/70"
-              onClick={() => setDetailsForEleve(null)}
+              onClick={() => setDetailsForEleveId(null)}
               aria-hidden
             />
             <div className="relative max-h-[90vh] w-full max-w-lg overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-800">
               <div className="flex items-center justify-between border-b border-stone-200 p-4 dark:border-neutral-700">
                 <h2 id="details-modal-title" className="text-lg font-medium text-stone-800 dark:text-stone-100">
-                  {detailsForEleve}
+                  {titreEleve}
                 </h2>
                 <button
                   type="button"
-                  onClick={() => setDetailsForEleve(null)}
+                  onClick={() => setDetailsForEleveId(null)}
                   className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-neutral-700 dark:hover:text-stone-300"
                   aria-label={lang === 'ar' ? 'إغلاق' : 'Fermer'}
                 >

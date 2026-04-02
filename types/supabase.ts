@@ -1,20 +1,27 @@
+/** Ligne `eleves` embarquée via jointure Supabase (`select(..., eleves(...))`). */
+export type EleveJoinRow = {
+  id: string;
+  prenom: string;
+  nom: string;
+  niveau: string;
+};
+
 export type NoteRow = {
   id: string;
-  niveau: string;
-  eleve: string;
+  eleve_id: string;
   jury: string;
   total: number;
   moyenne: number;
-  scores: Record<string, number>;
-  recorded_at: string;
-  publie: boolean;
+  scores: Record<string, number | string>;
+  recorded_at: string | null;
+  publie: boolean | null;
   date_publication: string | null;
   phase: string | null;
+  eleves: EleveJoinRow | null;
 };
 
 export type NoteInsert = {
-  niveau: string;
-  eleve: string;
+  eleve_id: string;
   jury: string;
   total: number;
   moyenne: number;
@@ -24,8 +31,6 @@ export type NoteInsert = {
 };
 
 export type NoteUpdate = {
-  niveau?: string;
-  eleve?: string;
   jury?: string;
   total?: number;
   moyenne?: number;
