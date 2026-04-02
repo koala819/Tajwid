@@ -2,7 +2,6 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
 import { niveauxConfig } from '@/data/niveaux';
 import { isAuthenticated } from '@/lib/auth';
-import { getConfig } from '@/lib/config';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
 import AdminHeader from '@/components/AdminHeader';
@@ -16,13 +15,16 @@ export default async function AdminPage() {
   if (!authenticated) {
     redirect('/?redirect=/admin');
   }
-  const [phaseSaisie, supabaseResult] = await Promise.all([
-    getConfig('phase_saisie'),
-    getSupabaseClient()
-      .from('notes')
-      .select(NOTES_SELECT_WITH_ELEVE)
-      .order('recorded_at', { ascending: false }),
-  ]);
+  const rawPhase = process.env.PHASE_SAISIE?.trim();
+  const phaseSaisie =
+    rawPhase === 'qualification' || rawPhase === 'demi_finale' || rawPhase === 'finale'
+      ? rawPhase
+      : 'demi_finale';
+
+  const supabaseResult = await getSupabaseClient()
+    .from('notes')
+    .select(NOTES_SELECT_WITH_ELEVE)
+    .order('recorded_at', { ascending: false });
   const currentPhase = phaseSaisie === 'finale' ? 'finale' : 'demi_finale';
 
   const allRows: NoteRow[] = supabaseResult.data ?? [];

@@ -73,20 +73,9 @@ export type EnseignantInsert = {
   login_username?: string | null;
 };
 
-/** Lignes de la table `app_settings` (paramètres clé → valeur, ex. `phase_saisie`). */
-export type AppSettingRow = {
-  key: string;
-  value: string;
-};
-
 export type Database = {
   public: {
     Tables: {
-      app_settings: {
-        Row: AppSettingRow;
-        Insert: AppSettingRow;
-        Update: Partial<AppSettingRow>;
-      };
       notes: {
         Row: NoteRow;
         Insert: NoteInsert;

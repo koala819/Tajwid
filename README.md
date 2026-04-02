@@ -41,11 +41,25 @@ npm install
 cp .env.local.example .env.local
 ```
 
-Éditez `.env.local` :
+Éditez `.env.local`. Voici les variables à avoir sous la main (le fichier [`.env.local.example`](.env.local.example) reprend les mêmes avec des commentaires) :
+
+| Variable | Obligatoire | Rôle |
+|----------|-------------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Oui | URL du projet Supabase (Settings → API → Project URL). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Oui | Clé publique « anon » (Settings → API → anon public). |
+| `PHASE_SAISIE` | Non* | Phase du concours pour la **saisie** des notes : `qualification`, `demi_finale` ou `finale`. Si absent ou invalide, la valeur par défaut est `demi_finale`. À définir sur l’hébergement (Vercel, etc.) quand vous changez de tour (pré-qualif → demi-finale → finale). |
+
+\* Sans `PHASE_SAISIE`, l’app fonctionne quand même grâce au défaut ; en production, il est recommandé de la fixer explicitement pour éviter toute ambiguïté.
+
+Exemple minimal :
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://votreprojet.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+PHASE_SAISIE=demi_finale
 ```
+
+**À quoi sert la « phase » ?** Le concours se déroule en plusieurs tours. Chaque note enregistrée en base est étiquetée avec la phase active au moment de la saisie (colonne `phase` sur les notes). Cela permet de distinguer les notes du pré-tour, de la demi-finale et de la finale sans mélanger les évaluations. La variable `PHASE_SAISIE` est lue côté serveur dans les pages et routes qui en ont besoin (valeur validée : `qualification`, `demi_finale` ou `finale`, sinon défaut `demi_finale`).
 
 ### 4. Lancer en local
 
@@ -126,7 +140,7 @@ types/
 
 1. Poussez votre code sur GitHub
 2. Importez le projet sur [Vercel](https://vercel.com)
-3. Ajoutez les variables d'environnement
+3. Ajoutez les variables d’environnement (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, et idéalement `PHASE_SAISIE`)
 4. Deploy !
 
 Voir [`docs/GUIDE-RAPIDE.md`](docs/GUIDE-RAPIDE.md) pour plus de détails.

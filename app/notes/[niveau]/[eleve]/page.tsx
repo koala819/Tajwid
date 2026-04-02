@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { findNiveauConfig } from '@/data/niveaux';
 import { findEleve } from '@/lib/eleves';
-import { getConfig } from '@/lib/config';
 import ClientNotePage from './ClientNotePage';
 
 export const dynamic = 'force-dynamic';
@@ -15,10 +14,15 @@ type PageProps = {
 
 export default async function Page(props: PageProps) {
   const params = await props.params;
-  const [niveauConfig, eleve, phaseSaisie] = await Promise.all([
+  const rawPhase = process.env.PHASE_SAISIE?.trim();
+  const phaseSaisie =
+    rawPhase === 'qualification' || rawPhase === 'demi_finale' || rawPhase === 'finale'
+      ? rawPhase
+      : 'demi_finale';
+
+  const [niveauConfig, eleve] = await Promise.all([
     Promise.resolve(findNiveauConfig(params.niveau)),
     findEleve(params.niveau, params.eleve),
-    getConfig('phase_saisie'),
   ]);
 
   if (!niveauConfig || !eleve) {
@@ -29,7 +33,7 @@ export default async function Page(props: PageProps) {
     <ClientNotePage
       niveauConfig={niveauConfig}
       eleve={eleve}
-      phaseSaisie={phaseSaisie || ''}
+      phaseSaisie={phaseSaisie}
     />
   );
 }
