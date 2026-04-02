@@ -73,7 +73,8 @@ export type EnseignantInsert = {
   login_username?: string | null;
 };
 
-export type ConfigRow = {
+/** Lignes de la table `app_settings` (paramètres clé → valeur, ex. `phase_saisie`). */
+export type AppSettingRow = {
   key: string;
   value: string;
 };
@@ -81,10 +82,10 @@ export type ConfigRow = {
 export type Database = {
   public: {
     Tables: {
-      config: {
-        Row: ConfigRow;
-        Insert: ConfigRow;
-        Update: Partial<ConfigRow>;
+      app_settings: {
+        Row: AppSettingRow;
+        Insert: AppSettingRow;
+        Update: Partial<AppSettingRow>;
       };
       notes: {
         Row: NoteRow;

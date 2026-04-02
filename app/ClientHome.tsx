@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
@@ -19,9 +19,15 @@ type ClientHomeProps = {
   authenticated: boolean;
 };
 
+function safeInternalPath(redirect: string | null): string | null {
+  if (!redirect || !redirect.startsWith('/') || redirect.startsWith('//')) return null;
+  return redirect;
+}
+
 export default function ClientHome({ creneaux, totalParticipants, authenticated }: ClientHomeProps) {
   const lang = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +49,13 @@ export default function ClientHome({ creneaux, totalParticipants, authenticated 
         return;
       }
 
-      router.refresh();
+      const next = safeInternalPath(searchParams.get('redirect'));
+      if (next) {
+        router.push(next);
+        router.refresh();
+      } else {
+        router.refresh();
+      }
     } catch {
       setError(lang === 'ar' ? 'خطأ في الاتصال' : 'Erreur de connexion');
     } finally {

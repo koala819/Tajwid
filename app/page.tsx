@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getElevesByNiveau } from '@/lib/eleves';
 import { isAuthenticated } from '@/lib/auth';
 import ClientHome from './ClientHome';
@@ -19,10 +20,18 @@ export default async function Home() {
   const totalParticipants = allEleves.length;
 
   return (
-    <ClientHome
-      creneaux={creneaux}
-      totalParticipants={totalParticipants}
-      authenticated={authenticated}
-    />
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-stone-50 dark:bg-neutral-900">
+          <p className="text-stone-500 dark:text-stone-400">Chargement…</p>
+        </div>
+      }
+    >
+      <ClientHome
+        creneaux={creneaux}
+        totalParticipants={totalParticipants}
+        authenticated={authenticated}
+      />
+    </Suspense>
   );
 }

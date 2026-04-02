@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export default async function AdminPage() {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
-    redirect('/login?redirect=/admin');
+    redirect('/?redirect=/admin');
   }
   const [phaseSaisie, supabaseResult] = await Promise.all([
     getConfig('phase_saisie'),

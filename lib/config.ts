@@ -3,7 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 export async function getConfig(key: string): Promise<string | null> {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .from('config')
+    .from('app_settings')
     .select('value')
     .eq('key', key)
     .maybeSingle();
@@ -14,8 +14,8 @@ export async function getConfig(key: string): Promise<string | null> {
 
 export async function setConfig(key: string, value: string): Promise<boolean> {
   const supabase = getSupabaseClient();
-  // Table config : le client Supabase peut inférer never si le schéma Database diffère du générateur
-  // @ts-expect-error — Insert pour config est valide (ConfigRow), l’inférence échoue
-  const { error } = await supabase.from('config').upsert({ key, value }, { onConflict: 'key' });
+  // Table app_settings : le client Supabase peut inférer never si le schéma Database diffère
+  // @ts-expect-error — Insert valide (AppSettingRow), l’inférence échoue
+  const { error } = await supabase.from('app_settings').upsert({ key, value }, { onConflict: 'key' });
   return !error;
 }
