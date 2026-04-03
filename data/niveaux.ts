@@ -115,6 +115,14 @@ export const niveauxConfig: Niveau[] = [
   },
 ];
 
+/** Mémorisation (hifdh) + récitation avec Coran : affichés en demi-finale / finale sur /resultats et /admin. */
+/** « Récitation avec Coran » en premier, puis préparatoire → niveau 4 dans l’ordre du concours. */
+export function getNiveauxPhaseResultats(): Niveau[] {
+  const hifdh = niveauxConfig.filter((n) => n.isHifdh === true);
+  const coran = niveauxConfig.find((n) => n.slug === 'recitation-avec-coran');
+  return coran ? [coran, ...hifdh] : hifdh;
+}
+
 export const findNiveauConfig = (niveauSlug: string) =>
   niveauxConfig.find(
     (niveau) => niveau.slug === niveauSlug,

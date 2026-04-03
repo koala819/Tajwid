@@ -1,6 +1,6 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
-import { niveauxConfig } from '@/data/niveaux';
+import { getNiveauxPhaseResultats } from '@/data/niveaux';
 import { isAuthenticated } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
@@ -55,6 +55,7 @@ export default async function AdminPage() {
     'Récitation - Niveau 1': 'tilawa-niveau1',
     'Récitation - Niveau 2': 'tilawa-niveau2',
     'Récitation - Niveau 3': 'tilawa-niveau3',
+    'Récitation avec Coran': 'recitation-avec-coran',
   };
 
   const grouped = levelRows.reduce<Record<string, NoteRow[]>>((acc, row) => {
@@ -66,11 +67,10 @@ export default async function AdminPage() {
     return acc;
   }, {});
 
-  // Pour la demi-finale, ne garder que les niveaux de mémorisation (hifdh)
-  // et uniquement ceux qui ont des notes
-  const niveauxHifdh = niveauxConfig
-    .filter((niveau) => niveau.isHifdh)
-    .filter((niveau) => grouped[niveau.slug]?.length > 0);
+  // Mémorisation + récitation avec Coran ; uniquement les niveaux qui ont des notes
+  const niveauxHifdh = getNiveauxPhaseResultats().filter(
+    (niveau) => grouped[niveau.slug]?.length > 0,
+  );
 
   return (
     <div className="min-h-screen bg-stone-50 py-10 dark:bg-neutral-900">

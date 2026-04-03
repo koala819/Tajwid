@@ -1,6 +1,6 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
-import { niveauxConfig } from '@/data/niveaux';
+import { getNiveauxPhaseResultats } from '@/data/niveaux';
 import { NOTES_SELECT_WITH_ELEVE, noteEleveDisplayName } from '@/lib/noteHelpers';
 
 const labelToSlug: Record<string, string> = {
@@ -20,6 +20,7 @@ const labelToSlug: Record<string, string> = {
   'Récitation - Niveau 1': 'tilawa-niveau1',
   'Récitation - Niveau 2': 'tilawa-niveau2',
   'Récitation - Niveau 3': 'tilawa-niveau3',
+  'Récitation avec Coran': 'recitation-avec-coran',
 };
 
 export type ResultatPhase = {
@@ -60,9 +61,7 @@ export async function getPublishedResultatsByPhase(
     return acc;
   }, {});
 
-  return niveauxConfig
-    .filter((n) => n.isHifdh)
-    .map((niveau) => {
+  return getNiveauxPhaseResultats().map((niveau) => {
       const niveauNotes = byNiveau[niveau.slug] ?? [];
       const byEleve = niveauNotes.reduce<Record<string, NoteRow[]>>((acc, note) => {
         const key = note.eleve_id;

@@ -72,26 +72,33 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
 
   return (
     <>
-      {/* Onglets des niveaux */}
-      <div className="overflow-x-auto border-b border-stone-200 dark:border-neutral-700">
-        <div className="flex gap-1">
+      {/* Onglets des niveaux : scroll horizontal sur mobile, pastilles lisibles */}
+      <div className="-mx-4 border-b border-stone-200 sm:mx-0 dark:border-neutral-700">
+        <div
+          className="flex snap-x snap-mandatory gap-1 overflow-x-auto overscroll-x-contain px-4 pb-1 sm:gap-2 sm:px-0 [-webkit-overflow-scrolling:touch]"
+          role="tablist"
+          aria-label={lang === 'ar' ? 'المستويات' : 'Niveaux'}
+        >
           {niveaux.map((niveau) => {
             const notes = notesGrouped[niveau.slug] ?? [];
             const count = new Set(notes.map((n) => n.eleve_id)).size;
             return (
               <button
                 key={niveau.slug}
+                type="button"
+                role="tab"
+                aria-selected={selectedNiveau === niveau.slug}
                 onClick={() => setSelectedNiveau(niveau.slug)}
-                className={`whitespace-nowrap border-b-2 px-6 py-3 text-sm font-normal transition-colors ${
+                className={`shrink-0 snap-start border-b-2 px-3 py-3 text-left text-sm font-normal transition-colors min-[480px]:px-5 sm:px-6 ${
                   selectedNiveau === niveau.slug
                     ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400'
                     : 'border-transparent text-stone-500 hover:border-stone-300 hover:text-stone-700 dark:text-stone-400 dark:hover:border-neutral-600 dark:hover:text-stone-300'
                 }`}
                 dir={lang === 'ar' ? 'rtl' : 'ltr'}
               >
-                {lang === 'ar' ? niveau.labelAr : niveau.label}
+                <span className="whitespace-nowrap">{lang === 'ar' ? niveau.labelAr : niveau.label}</span>
                 {count > 0 && (
-                  <span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs dark:bg-neutral-700">
+                  <span className="ms-2 inline-block rounded-full bg-stone-100 px-2 py-0.5 text-xs tabular-nums dark:bg-neutral-700">
                     {count}
                   </span>
                 )}

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
 import LanguageSwitch from '@/components/LanguageSwitch';
-import { niveauxConfig } from '@/data/niveaux';
+import { getNiveauxPhaseResultats, niveauxConfig } from '@/data/niveaux';
 import type { Eleve } from '@/data/niveaux';
 import type { ResultatPhase } from '@/lib/notes';
 
@@ -22,7 +22,7 @@ type ClientResultatsProps = {
 
 type PhaseTab = 'qualification' | 'demi_finale' | 'finale';
 
-const niveauxHifdh = niveauxConfig.filter((n) => n.isHifdh);
+const niveauxPhaseResultats = getNiveauxPhaseResultats();
 
 export default function ClientResultats({
   niveauxWithEleves,
@@ -144,7 +144,7 @@ export default function ClientResultats({
 
         {phase === 'demi_finale' && (
           <div className="space-y-12">
-            {niveauxHifdh.map((niveauConfig, i) => {
+            {niveauxPhaseResultats.map((niveauConfig, i) => {
               const resultats = resultatsDemiFinale[i] ?? [];
               if (resultats.length === 0) return null;
               return (
@@ -184,7 +184,7 @@ export default function ClientResultats({
 
         {phase === 'finale' && (
           <div className="space-y-12">
-            {niveauxHifdh.map((niveauConfig, i) => {
+            {niveauxPhaseResultats.map((niveauConfig, i) => {
               const resultats = resultatsFinale[i] ?? [];
               if (resultats.length === 0) return null;
               return (
