@@ -58,10 +58,17 @@ export const translations = {
     published: 'Publié',
     hidden: 'Caché',
     showOnResultsPage: 'Afficher sur la page des résultats',
+    qualifiedToggleLabel: 'Qualifié pour la suite',
+    qualifiedYes: 'Oui',
+    qualifiedNo: 'Non',
     seePublicPage: 'Voir la page publique',
     
     // Page résultats
     resultsTitle: 'Résultats de la demi-finale',
+    resultsDemiFinaleSubtitle:
+      'Classement des moyennes publiées (au moins 2 juges par candidat).',
+    resultsFinaleTitle: 'Résultats de la finale',
+    resultsFinaleSubtitle: 'Classement des moyennes publiées (au moins 2 juges par candidat).',
     resultsQualifTitle: 'Résultats de qualification',
     resultsQualifSubtitle: 'Concours de Tajwid 2025 - Phase de qualification',
     noPublishedResults: 'Aucun résultat publié pour le moment',
@@ -69,7 +76,11 @@ export const translations = {
     phaseQualification: 'Qualification',
     phaseDemiFinale: 'Demi-finale',
     phaseFinale: 'Finale',
-    noResultsPhase: 'Aucun résultat publié pour cette phase',
+    noResultsPhase: 'Aucun résultat publié pour cette phase.',
+    noResultsPhaseHelp:
+      'Activez « Afficher sur la page des résultats » pour chaque candidat (au moins 2 notes publiées par élève).',
+    resultsPhaseEnvHint:
+      'Cette page affiche uniquement la phase définie par la variable d’environnement PHASE_SAISIE sur le serveur.',
     phaseLabel: 'Phase',
     phaseChoice: 'Choix de la phase',
     juryLabel: 'Jury',
@@ -154,10 +165,16 @@ export const translations = {
     published: 'منشور',
     hidden: 'مخفي',
     showOnResultsPage: 'عرض على صفحة النتائج',
+    qualifiedToggleLabel: 'مؤهل للمرحلة التالية',
+    qualifiedYes: 'نعم',
+    qualifiedNo: 'لا',
     seePublicPage: 'عرض الصفحة العامة',
     
     // Page résultats
     resultsTitle: 'نتائج نصف النهائي',
+    resultsDemiFinaleSubtitle: 'ترتيب المتوسطات المنشورة (حكمان على الأقل لكل مشارك).',
+    resultsFinaleTitle: 'نتائج النهائي',
+    resultsFinaleSubtitle: 'ترتيب المتوسطات المنشورة (حكمان على الأقل لكل مشارك).',
     resultsQualifTitle: 'نتائج التصفيات',
     resultsQualifSubtitle: 'مسابقة التجويد 2025 - مرحلة التصفيات',
     noPublishedResults: 'لا توجد نتائج منشورة في الوقت الحالي',
@@ -165,7 +182,11 @@ export const translations = {
     phaseQualification: 'التصفيات',
     phaseDemiFinale: 'نصف النهائي',
     phaseFinale: 'النهائي',
-    noResultsPhase: 'لا توجد نتائج منشورة لهذه المرحلة',
+    noResultsPhase: 'لا توجد نتائج منشورة لهذه المرحلة.',
+    noResultsPhaseHelp:
+      'فعّل « عرض على صفحة النتائج » لكل مشارك (نقطتان منشورتان على الأقل لكل طالب).',
+    resultsPhaseEnvHint:
+      'تعرض هذه الصفحة المرحلة المحددة فقط عبر المتغير PHASE_SAISIE على الخادم.',
     phaseLabel: 'المرحلة',
     phaseChoice: 'اختر المرحلة',
     juryLabel: 'الحكم',

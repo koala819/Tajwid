@@ -1,26 +1,33 @@
 import { getNiveauxWithEleves } from '@/lib/eleves';
 import { getPublishedResultatsByPhase } from '@/lib/notes';
+import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 import ClientResultats from './ClientResultats';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ResultatsPage() {
-  const [niveauxWithEleves, resultatsDemiFinale, resultatsFinale] = await Promise.all([
-    getNiveauxWithEleves(undefined, 'qualifier'),
-    getPublishedResultatsByPhase('demi_finale'),
-    getPublishedResultatsByPhase('finale'),
-  ]);
-  const totalParticipants = niveauxWithEleves.reduce(
-    (sum, n) => sum + n.eleves.length,
-    0,
-  );
+  const phaseSaisie = getPhaseSaisieFromEnv();
 
-  return (
-    <ClientResultats
-      niveauxWithEleves={niveauxWithEleves}
-      totalParticipants={totalParticipants}
-      resultatsDemiFinale={resultatsDemiFinale}
-      resultatsFinale={resultatsFinale}
-    />
-  );
+  if (phaseSaisie === 'qualification') {
+    const niveauxWithEleves = await getNiveauxWithEleves(undefined);
+    const totalParticipants = niveauxWithEleves.reduce(
+      (sum, n) => sum + n.eleves.length,
+      0,
+    );
+    return (
+      <ClientResultats
+        phaseSaisie="qualification"
+        niveauxWithEleves={niveauxWithEleves}
+        totalParticipants={totalParticipants}
+      />
+    );
+  }
+
+  if (phaseSaisie === 'demi_finale') {
+    const resultatsParNiveau = await getPublishedResultatsByPhase('demi_finale');
+    return <ClientResultats phaseSaisie="demi_finale" resultatsParNiveau={resultatsParNiveau} />;
+  }
+
+  const resultatsParNiveau = await getPublishedResultatsByPhase('finale');
+  return <ClientResultats phaseSaisie="finale" resultatsParNiveau={resultatsParNiveau} />;
 }

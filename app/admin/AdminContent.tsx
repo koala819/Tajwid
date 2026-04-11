@@ -7,21 +7,25 @@ import { criteresMap } from '@/data/criteres';
 import { t, type Language } from '@/data/translations';
 import EditNoteModal from '@/components/EditNoteModal';
 import PublishToggle from '@/components/PublishToggle';
+import QualifierToggle from '@/components/QualifierToggle';
 import { noteEleveDisplayName } from '@/lib/noteHelpers';
 
 type AdminContentProps = {
   niveaux: Niveau[];
   notesGrouped: Record<string, NoteRow[]>;
+  qualifiedEleveIds: string[];
 };
 
 const formatDate = (value?: string | null) =>
   value ? new Date(value).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
-export default function AdminContent({ niveaux, notesGrouped }: AdminContentProps) {
+export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds }: AdminContentProps) {
+  const qualifiedSet = new Set(qualifiedEleveIds);
   const [selectedNiveau, setSelectedNiveau] = useState<string>(niveaux[0]?.slug || '');
   const [editingNote, setEditingNote] = useState<NoteRow | null>(null);
   const [detailsForEleveId, setDetailsForEleveId] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>('fr');
+  const [search, setSearch] = useState('');
 
   // Charger la préférence de langue depuis localStorage
   useEffect(() => {
@@ -59,11 +63,18 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
     return acc;
   }, {});
 
+  const searchNorm = search.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
   const elevesSorted = Object.entries(groupedByEleve)
     .map(([eleveId, notes]) => {
       const moyenne = notes.reduce((sum, n) => sum + n.total, 0) / notes.length;
       const eleveNom = noteEleveDisplayName(notes[0]);
       return { eleveId, eleveNom, notes, moyenne };
+    })
+    .filter(({ eleveNom }) => {
+      if (!searchNorm) return true;
+      const nom = eleveNom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return nom.includes(searchNorm);
     })
     .sort((a, b) => {
       if (b.moyenne !== a.moyenne) return b.moyenne - a.moyenne;
@@ -108,6 +119,26 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
         </div>
       </div>
 
+      {/* Barre de recherche */}
+      {Object.keys(groupedByEleve).length > 0 && (
+        <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7 7 0 104.65 4.65a7 7 0 0012 12z" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={lang === 'ar' ? 'بحث عن طالب…' : 'Rechercher un élève…'}
+            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+            className="w-full rounded-lg border border-stone-200 bg-white py-2.5 pl-9 pr-4 text-sm text-stone-800 placeholder-stone-400 outline-none transition focus:border-amber-500 focus:ring-1 focus:ring-amber-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-stone-100 dark:placeholder-stone-500 dark:focus:border-amber-500 sm:max-w-xs"
+          />
+        </div>
+      )}
+
       {/* Contenu du niveau sélectionné */}
       {currentNiveau && (
         <div className="space-y-6">
@@ -115,6 +146,12 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
             <div className="rounded-lg border border-dashed border-stone-200 bg-white p-12 text-center dark:border-neutral-700 dark:bg-neutral-800">
               <p className="text-sm text-stone-500 dark:text-stone-400">
                 {t('noNotes', lang)}
+              </p>
+            </div>
+          ) : elevesSorted.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-stone-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
+              <p className="text-sm text-stone-500 dark:text-stone-400">
+                {lang === 'ar' ? 'لا توجد نتائج للبحث' : 'Aucun résultat pour cette recherche'}
               </p>
             </div>
           ) : (
@@ -132,11 +169,11 @@ export default function AdminContent({ niveaux, notesGrouped }: AdminContentProp
                       {moyenne.toFixed(1)}
                       <span className="text-base font-normal text-stone-500 dark:text-stone-400"> {lang === 'ar' ? '/ ١٠٠' : '/ 100'}</span>
                     </p>
-                    <div className="flex shrink-0 items-center gap-4">
-                      <PublishToggle
-                        notes={notes}
-                        eleveNom={eleveNom}
-                        moyenneFinale={moyenne}
+                    <div className="flex w-full flex-col gap-4 sm:w-auto sm:min-w-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-4">
+                      <PublishToggle notes={notes} />
+                      <QualifierToggle
+                        eleveId={eleveId}
+                        qualified={qualifiedSet.has(eleveId)}
                       />
                       <button
                         type="button"

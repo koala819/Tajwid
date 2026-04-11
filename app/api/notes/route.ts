@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getSupabaseClient } from '@/lib/supabase/client';
+import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 
 const criteresCount = 13; // Nombre de critères de notation (sans les observations)
 
@@ -33,11 +34,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const rawPhase = process.env.PHASE_SAISIE?.trim();
-  const phase =
-    rawPhase === 'qualification' || rawPhase === 'demi_finale' || rawPhase === 'finale'
-      ? rawPhase
-      : 'demi_finale';
+  const phase = getPhaseSaisieFromEnv();
 
   const insertPayload = {
     eleve_id: payload.eleve_id,

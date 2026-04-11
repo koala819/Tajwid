@@ -91,9 +91,22 @@ export type Database = {
         Insert: Omit<EnseignantRow, 'id'>;
         Update: Partial<Omit<EnseignantRow, 'id'>>;
       };
+      qualifications: {
+        Row: QualificationRow;
+        Insert: Omit<QualificationRow, 'created_at'>;
+        Update: Partial<Omit<QualificationRow, 'created_at'>>;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
   };
+};
+
+export type QualificationPhase = 'qualification' | 'demi_finale' | 'finale';
+
+export type QualificationRow = {
+  eleve_id: string;
+  phase: QualificationPhase;
+  created_at: string;
 };

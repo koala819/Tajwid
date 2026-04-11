@@ -2,6 +2,7 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
 import { getNiveauxPhaseResultats } from '@/data/niveaux';
 import { isAuthenticated } from '@/lib/auth';
+import { getPhaseSaisieFromEnv, type PhaseSaisie } from '@/lib/phaseSaisie';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
 import AdminHeader from '@/components/AdminHeader';
@@ -10,30 +11,32 @@ import { NOTES_SELECT_WITH_ELEVE } from '@/lib/noteHelpers';
 
 export const dynamic = 'force-dynamic';
 
+function noteMatchesAdminPhase(row: NoteRow, phaseSaisie: PhaseSaisie): boolean {
+  const p = row.phase;
+  if (phaseSaisie === 'finale') return p === 'finale';
+  if (phaseSaisie === 'qualification') return p === 'qualification';
+  /* demi_finale : notes de ce tour + anciennes sans phase explicite */
+  return p === 'demi_finale' || p === null || p === undefined || p === '';
+}
+
 export default async function AdminPage() {
   const authenticated = await isAuthenticated();
   if (!authenticated) {
     redirect('/?redirect=/admin');
   }
-  const rawPhase = process.env.PHASE_SAISIE?.trim();
-  const phaseSaisie =
-    rawPhase === 'qualification' || rawPhase === 'demi_finale' || rawPhase === 'finale'
-      ? rawPhase
-      : 'demi_finale';
+  const phaseSaisie = getPhaseSaisieFromEnv();
 
   const supabaseResult = await getSupabaseClient()
     .from('notes')
     .select(NOTES_SELECT_WITH_ELEVE)
     .order('recorded_at', { ascending: false });
-  const currentPhase = phaseSaisie === 'finale' ? 'finale' : 'demi_finale';
 
   const allRows: NoteRow[] = supabaseResult.data ?? [];
   const { error } = supabaseResult;
 
-  const levelRows: NoteRow[] = allRows.filter((row) => {
-    const p = row.phase ?? 'demi_finale';
-    return p === currentPhase;
-  });
+  const levelRows: NoteRow[] = allRows.filter((row) =>
+    noteMatchesAdminPhase(row, phaseSaisie),
+  );
 
   // Mapper les anciens labels vers les nouveaux slugs pour rétrocompatibilité
   const labelToSlug: Record<string, string> = {
@@ -72,6 +75,18 @@ export default async function AdminPage() {
     (niveau) => grouped[niveau.slug]?.length > 0,
   );
 
+  // Élèves qualifiés pour la phase courante (table `qualifications`)
+  const eleveIds = [...new Set(levelRows.map((r) => r.eleve_id).filter(Boolean))];
+  let qualifiedEleveIds: Set<string> = new Set();
+  if (eleveIds.length > 0) {
+    const { data: qualifData } = await getSupabaseClient()
+      .from('qualifications')
+      .select('eleve_id')
+      .eq('phase', phaseSaisie)
+      .in('eleve_id', eleveIds) as { data: Array<{ eleve_id: string }> | null };
+    qualifiedEleveIds = new Set((qualifData ?? []).map((r) => r.eleve_id));
+  }
+
   return (
     <div className="min-h-screen bg-stone-50 py-10 dark:bg-neutral-900">
       <main className="mx-auto max-w-6xl space-y-8 px-4">
@@ -84,7 +99,11 @@ export default async function AdminPage() {
           </div>
         ) : null}
 
-        <AdminContent niveaux={niveauxHifdh} notesGrouped={grouped} />
+        <AdminContent
+          niveaux={niveauxHifdh}
+          notesGrouped={grouped}
+          qualifiedEleveIds={[...qualifiedEleveIds]}
+        />
       </main>
     </div>
   );
