@@ -146,6 +146,13 @@ export async function getResultatsByPhase(
     return [];
   }
 
+  const elevesData = (elevesRes.data ?? []) as {
+    id: string;
+    nom: string;
+    prenom: string;
+    niveau: string;
+  }[];
+
   const qualifiedIds = new Set<string>(
     (qualifsRes.data ?? []).map((r: { eleve_id: string }) => r.eleve_id),
   );
@@ -168,7 +175,7 @@ export async function getResultatsByPhase(
   // Regrouper par niveau en respectant l'ordre de niveauxConfig
   const byNiveau: Record<string, EleveResultat[]> = {};
 
-  for (const eleve of elevesRes.data ?? []) {
+  for (const eleve of elevesData) {
     const isQualified = qualifiedIds.has(eleve.id);
     const eleveNotes = (notesByEleve[eleve.id] ?? [])
       .sort((a, b) => (a.recorded_at ?? '').localeCompare(b.recorded_at ?? ''));

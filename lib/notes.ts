@@ -59,10 +59,11 @@ export async function getPublishedNotesForStudents(
     return [];
   }
 
-  const byEleve = (data ?? []).reduce<Record<string, { total: number; scores: Record<string, number | string> }[]>>(
+  type NoteRaw = { eleve_id: string; total: number; scores: Record<string, number | string> };
+  const byEleve = (data as NoteRaw[] ?? []).reduce<Record<string, NoteRaw[]>>(
     (acc, note) => {
       acc[note.eleve_id] = acc[note.eleve_id] ?? [];
-      acc[note.eleve_id].push(note as { total: number; scores: Record<string, number | string> });
+      acc[note.eleve_id].push(note);
       return acc;
     },
     {},
