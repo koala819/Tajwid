@@ -1,4 +1,4 @@
-import { getNiveauxWithEleves } from '@/lib/eleves';
+import { getNiveauxWithEleves, getQualifiedIdsForPhase } from '@/lib/eleves';
 import { getPublishedResultatsByPhase } from '@/lib/notes';
 import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 import ClientResultats from './ClientResultats';
@@ -9,16 +9,17 @@ export default async function ResultatsPage() {
   const phaseSaisie = getPhaseSaisieFromEnv();
 
   if (phaseSaisie === 'qualification') {
-    const niveauxWithEleves = await getNiveauxWithEleves(undefined);
-    const totalParticipants = niveauxWithEleves.reduce(
-      (sum, n) => sum + n.eleves.length,
-      0,
-    );
+    const [niveauxWithEleves, qualifiedIds] = await Promise.all([
+      getNiveauxWithEleves(undefined),
+      getQualifiedIdsForPhase('demi_finale'),
+    ]);
+    const totalParticipants = niveauxWithEleves.reduce((sum, n) => sum + n.eleves.length, 0);
     return (
       <ClientResultats
         phaseSaisie="qualification"
         niveauxWithEleves={niveauxWithEleves}
         totalParticipants={totalParticipants}
+        qualifiedIds={qualifiedIds}
       />
     );
   }

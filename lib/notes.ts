@@ -45,7 +45,10 @@ export async function getPublishedResultatsByPhase(
     .or(`phase.eq.${phase},phase.is.null`)
     .order('total', { ascending: false });
 
-  if (error) return [];
+  if (error) {
+    console.error('[getPublishedResultatsByPhase] Supabase error:', error.message);
+    return [];
+  }
 
   const notesRaw: NoteRow[] = data ?? [];
   const notes =
@@ -71,7 +74,7 @@ export async function getPublishedResultatsByPhase(
       }, {});
 
       const resultats: ResultatPhase[] = Object.entries(byEleve)
-        .filter(([, eleveNotes]) => eleveNotes.length >= 2)
+        .filter(([, eleveNotes]) => eleveNotes.length >= 1)
         .map(([, eleveNotes]) => {
           const moyenne =
             eleveNotes.reduce((s, n) => s + n.total, 0) / eleveNotes.length;

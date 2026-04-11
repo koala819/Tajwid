@@ -77,6 +77,20 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
   return niveauxWithEleves.filter((niveau) => niveau.eleves.length > 0);
 }
 
+export async function getQualifiedIdsForPhase(phase: string): Promise<string[]> {
+  const supabaseClient = getSupabaseClient();
+  const { data, error } = await (supabaseClient.from('qualifications' as never) as any)
+    .select('eleve_id')
+    .eq('phase', phase);
+
+  if (error) {
+    console.error('Erreur lors du chargement des qualifications:', error);
+    return [];
+  }
+
+  return (data ?? []).map((row: { eleve_id: string }) => row.eleve_id);
+}
+
 export async function findEleve(niveauSlug: string, eleveSlug: string) {
   const niveaux = await getNiveauxWithEleves();
   const niveau = niveaux.find((n) => n.slug === niveauSlug);
