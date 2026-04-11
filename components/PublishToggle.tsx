@@ -29,22 +29,26 @@ export default function PublishToggle({ notes }: PublishToggleProps) {
     return () => { window.removeEventListener('storage', handleStorage); clearInterval(interval); };
   }, []);
 
-  useEffect(() => {
-    setIsPublished(notes.length > 0 && notes.every((n) => n.publie));
-  }, [notes]);
-
   const handleToggle = async () => {
     if (notes.length === 0) return;
+    const newValue = !isPublished;
     setLoading(true);
+    setIsPublished(newValue);
     try {
       const response = await fetch('/api/notes/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ noteIds: notes.map((n) => n.id), publie: !isPublished }),
+        body: JSON.stringify({ noteIds: notes.map((n) => n.id), publie: newValue }),
       });
-      if (response.ok) { setIsPublished(!isPublished); router.refresh(); }
+      if (!response.ok) {
+        setIsPublished(!newValue);
+      } else {
+        // Délai court pour laisser Supabase propager l'écriture avant le rechargement
+        setTimeout(() => router.refresh(), 500);
+      }
     } catch (e) {
       console.error('Erreur publication', e);
+      setIsPublished(!newValue);
     } finally {
       setLoading(false);
     }

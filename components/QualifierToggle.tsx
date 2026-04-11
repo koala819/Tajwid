@@ -16,10 +16,6 @@ export default function QualifierToggle({ eleveId, qualified: initialQualified }
   const [lang, setLang] = useState<Language>('fr');
 
   useEffect(() => {
-    setQualified(initialQualified);
-  }, [initialQualified, eleveId]);
-
-  useEffect(() => {
     const savedLang = localStorage.getItem('admin_langue') as Language;
     if (savedLang === 'ar' || savedLang === 'fr') setLang(savedLang);
 
@@ -33,17 +29,23 @@ export default function QualifierToggle({ eleveId, qualified: initialQualified }
   }, []);
 
   const handleToggle = async () => {
-    setLoading(true);
     const next = !qualified;
+    setLoading(true);
+    setQualified(next);
     try {
       const response = await fetch('/api/eleves/qualification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ eleveId, qualified: next }),
       });
-      if (response.ok) { setQualified(next); router.refresh(); }
+      if (!response.ok) {
+        setQualified(!next);
+      } else {
+        setTimeout(() => router.refresh(), 500);
+      }
     } catch (e) {
       console.error('Erreur qualification', e);
+      setQualified(!next);
     } finally {
       setLoading(false);
     }
