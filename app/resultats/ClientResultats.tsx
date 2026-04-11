@@ -9,6 +9,37 @@ import type { NiveauResultat } from '@/lib/eleves';
 import type { ResultatPhase } from '@/lib/notes';
 import type { PhaseSaisie } from '@/lib/phaseSaisie';
 import { criteres } from '@/data/criteres';
+import type { NoteJury } from '@/lib/eleves';
+
+/** Noms officiels des 3 jurys du concours */
+const JURYS_OFFICIELS = ['Abderrahmane', 'Maya', 'Amina'];
+
+/**
+ * Retourne les étiquettes affichées pour chaque note.
+ * Si un nom de jury est dupliqué, on le remplace par un nom manquant
+ * de la liste officielle plutôt que d'afficher deux fois le même prénom.
+ */
+function juryLabels(notes: NoteJury[]): string[] {
+  const labels = notes.map((n) => n.jury);
+  const seen = new Set<string>();
+
+  // Noms officiels absents des notes (ce sont les "vrais" noms des autres jurys)
+  const nomsDansNotes = new Set(notes.map((n) => n.jury));
+  const manquants = JURYS_OFFICIELS.filter((j) => !nomsDansNotes.has(j));
+  let missingIdx = 0;
+
+  for (let i = 0; i < labels.length; i++) {
+    if (seen.has(labels[i])) {
+      // Doublon : remplacer par le prochain nom manquant disponible
+      if (missingIdx < manquants.length) {
+        labels[i] = manquants[missingIdx++];
+      }
+    }
+    seen.add(labels[i]);
+  }
+
+  return labels;
+}
 
 type ClientResultatsProps =
   | {
@@ -190,63 +221,66 @@ export default function ClientResultats(props: ClientResultatsProps) {
                             {/* Détail : une section par jury */}
                             {isExpanded && (
                               <div className="border-t border-stone-100 bg-stone-50 px-4 pb-4 pt-3 dark:border-neutral-700 dark:bg-neutral-900/40 space-y-4">
-                                {eleve.notes.map((note, noteIdx) => {
-                                  const { observations, ...scoresCriteres } = note.scores as Record<string, number | string>;
-                                  return (
-                                    <div key={`${note.jury}-${noteIdx}`} className="space-y-2">
-                                      <div className="flex items-center justify-between">
-                                        <p className="text-xs font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                                          {note.jury}
-                                        </p>
-                                        <p className="tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
-                                          {note.total}/{maxScore}
-                                        </p>
-                                      </div>
-                                      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                                        {criteres
-                                          .filter((c) => !(noHifdh && c.id === 'hifdh'))
-                                          .filter((c) => scoresCriteres[c.id] !== undefined)
-                                          .map((c) => {
-                                            const val = scoresCriteres[c.id] as number;
-                                            const pct = val / c.max;
-                                            const barColor =
-                                              pct >= 0.8
-                                                ? 'bg-emerald-400 dark:bg-emerald-500'
-                                                : pct >= 0.5
-                                                  ? 'bg-amber-400 dark:bg-amber-500'
-                                                  : 'bg-red-400 dark:bg-red-500';
-                                            return (
-                                              <div
-                                                key={c.id}
-                                                className="rounded-md border border-stone-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
-                                                dir={isAr ? 'rtl' : 'ltr'}
-                                              >
-                                                <div className="flex items-center justify-between gap-2">
-                                                  <p className="truncate text-xs text-stone-500 dark:text-stone-400">
-                                                    {isAr ? c.label : c.labelFr}
-                                                  </p>
-                                                  <span className="shrink-0 tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
-                                                    {val}/{c.max}
-                                                  </span>
+                                {(() => {
+                                  const labels = juryLabels(eleve.notes);
+                                  return eleve.notes.map((note, noteIdx) => {
+                                    const { observations, ...scoresCriteres } = note.scores as Record<string, number | string>;
+                                    return (
+                                      <div key={noteIdx} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                          <p className="text-xs font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                                            {labels[noteIdx]}
+                                          </p>
+                                          <p className="tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
+                                            {note.total}/{maxScore}
+                                          </p>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                                          {criteres
+                                            .filter((c) => !(noHifdh && c.id === 'hifdh'))
+                                            .filter((c) => scoresCriteres[c.id] !== undefined)
+                                            .map((c) => {
+                                              const val = scoresCriteres[c.id] as number;
+                                              const pct = val / c.max;
+                                              const barColor =
+                                                pct >= 0.8
+                                                  ? 'bg-emerald-400 dark:bg-emerald-500'
+                                                  : pct >= 0.5
+                                                    ? 'bg-amber-400 dark:bg-amber-500'
+                                                    : 'bg-red-400 dark:bg-red-500';
+                                              return (
+                                                <div
+                                                  key={c.id}
+                                                  className="rounded-md border border-stone-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                                                  dir={isAr ? 'rtl' : 'ltr'}
+                                                >
+                                                  <div className="flex items-center justify-between gap-2">
+                                                    <p className="truncate text-xs text-stone-500 dark:text-stone-400">
+                                                      {isAr ? c.label : c.labelFr}
+                                                    </p>
+                                                    <span className="shrink-0 tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
+                                                      {val}/{c.max}
+                                                    </span>
+                                                  </div>
+                                                  <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-neutral-700">
+                                                    <div
+                                                      className={`h-full rounded-full ${barColor} transition-all`}
+                                                      style={{ width: `${Math.min(pct * 100, 100)}%` }}
+                                                    />
+                                                  </div>
                                                 </div>
-                                                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-neutral-700">
-                                                  <div
-                                                    className={`h-full rounded-full ${barColor} transition-all`}
-                                                    style={{ width: `${Math.min(pct * 100, 100)}%` }}
-                                                  />
-                                                </div>
-                                              </div>
-                                            );
-                                          })}
+                                              );
+                                            })}
+                                        </div>
+                                        {typeof observations === 'string' && observations && (
+                                          <p className="rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-stone-300">
+                                            {observations}
+                                          </p>
+                                        )}
                                       </div>
-                                      {typeof observations === 'string' && observations && (
-                                        <p className="rounded-md bg-white px-3 py-2 text-sm text-stone-600 dark:bg-neutral-800 dark:text-stone-300 border border-stone-200 dark:border-neutral-700">
-                                          {observations}
-                                        </p>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                                    );
+                                  });
+                                })()}
                               </div>
                             )}
                           </div>

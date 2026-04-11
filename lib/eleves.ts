@@ -96,6 +96,7 @@ export type NoteJury = {
   total: number;
   moyenne: number;
   scores: Record<string, number | string>;
+  recorded_at: string | null;
 };
 
 export type EleveResultat = {
@@ -136,7 +137,7 @@ export async function getResultatsByPhase(
       .eq('phase', phaseSaisie),
     supabase
       .from('notes')
-      .select('eleve_id, jury, total, moyenne, scores')
+      .select('eleve_id, jury, total, moyenne, scores, recorded_at')
       .eq('phase', phaseSaisie),
   ]);
 
@@ -156,10 +157,11 @@ export async function getResultatsByPhase(
       total: number;
       moyenne: number;
       scores: Record<string, number | string>;
+      recorded_at: string | null;
     }[]
   ).reduce<Record<string, NoteJury[]>>((acc, n) => {
     acc[n.eleve_id] = acc[n.eleve_id] ?? [];
-    acc[n.eleve_id].push({ jury: n.jury, total: n.total, moyenne: n.moyenne, scores: n.scores });
+    acc[n.eleve_id].push({ jury: n.jury, total: n.total, moyenne: n.moyenne, scores: n.scores, recorded_at: n.recorded_at });
     return acc;
   }, {});
 
@@ -168,7 +170,8 @@ export async function getResultatsByPhase(
 
   for (const eleve of elevesRes.data ?? []) {
     const isQualified = qualifiedIds.has(eleve.id);
-    const eleveNotes = notesByEleve[eleve.id] ?? [];
+    const eleveNotes = (notesByEleve[eleve.id] ?? [])
+      .sort((a, b) => (a.recorded_at ?? '').localeCompare(b.recorded_at ?? ''));
 
     // N'afficher que les élèves qui ont une note ou une qualification pour cette phase
     if (!isQualified && eleveNotes.length === 0) continue;
