@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 
-const criteresCount = 13; // Nombre de critères de notation (sans les observations)
+/** Récitation avec Coran : 12 critères (sans hifdh). Tous les autres : 13. */
+const CRITERES_COUNT_STANDARD = 13;
+const CRITERES_COUNT_SANS_HIFDH = 12;
 
 type NotePayload = {
   eleve_id: string;
@@ -27,9 +29,12 @@ export async function POST(request: Request) {
   const { observations, ...scoresCriteres } = payload.scores ?? {};
   const scoreValues = Object.values(scoresCriteres);
 
-  if (scoreValues.length !== criteresCount || scoreValues.some((value) => typeof value !== 'number')) {
+  const hasHifdh = 'hifdh' in scoresCriteres;
+  const expectedCount = hasHifdh ? CRITERES_COUNT_STANDARD : CRITERES_COUNT_SANS_HIFDH;
+
+  if (scoreValues.length !== expectedCount || scoreValues.some((value) => typeof value !== 'number')) {
     return NextResponse.json(
-      { error: `Les scores doivent contenir ${criteresCount} valeurs numériques.` },
+      { error: `Les scores doivent contenir ${expectedCount} valeurs numériques.` },
       { status: 400 }
     );
   }

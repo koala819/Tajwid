@@ -10,6 +10,8 @@ type ScoreMap = Record<string, number>;
 
 type FormulaireNotesProps = {
   eleveId: string;
+  /** Si true, le critère `hifdh` (mémorisation) est masqué (ex. récitation avec Coran). */
+  noHifdh?: boolean;
 };
 
 const JURY_OPTIONS = [
@@ -23,12 +25,14 @@ const JURY_OPTIONS = [
   'Noura',
 ] as const;
 
-const defaultScores: ScoreMap = criteres.reduce((acc, critere) => {
-  acc[critere.id] = 0;
-  return acc;
-}, {} as ScoreMap);
+export default function FormulaireNotes({ eleveId, noHifdh = false }: FormulaireNotesProps) {
+  const criteresActifs = noHifdh ? criteres.filter((c) => c.id !== 'hifdh') : criteres;
 
-export default function FormulaireNotes({ eleveId }: FormulaireNotesProps) {
+  const defaultScores: ScoreMap = criteresActifs.reduce((acc, critere) => {
+    acc[critere.id] = 0;
+    return acc;
+  }, {} as ScoreMap);
+
   const [scores, setScores] = useState<ScoreMap>(defaultScores);
   const [jury, setJury] = useState('');
   const [observations, setObservations] = useState('');
@@ -61,7 +65,7 @@ export default function FormulaireNotes({ eleveId }: FormulaireNotesProps) {
   );
 
   const handleChange = (critereId: string, value: number) => {
-    const critere = criteres.find((c) => c.id === critereId);
+    const critere = criteresActifs.find((c) => c.id === critereId);
     if (!critere) return;
 
     // Limiter la valeur au maximum autorisé pour ce critère
@@ -157,14 +161,14 @@ export default function FormulaireNotes({ eleveId }: FormulaireNotesProps) {
   return (
     <div className="space-y-8 rounded-lg border border-stone-200 bg-white p-8 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
       <section className="border-b border-stone-200 pb-6 dark:border-neutral-700">
-        <div>
+          <div>
           {lang === 'ar' ? (
             <p className="text-right text-sm font-normal text-stone-700 dark:text-stone-200" dir="rtl">
-              توزيع النقاط لمسابقة التجويد (المجموع 100 نقطة)
+              توزيع النقاط لمسابقة التجويد (المجموع {noHifdh ? 75 : 100} نقطة)
             </p>
           ) : (
             <p className="text-sm font-normal text-stone-700 dark:text-stone-200">
-              Distribution des points (Total 100 points)
+              Distribution des points (Total {noHifdh ? 75 : 100} points)
             </p>
           )}
         </div>
@@ -204,7 +208,7 @@ export default function FormulaireNotes({ eleveId }: FormulaireNotesProps) {
               </tr>
             </thead>
             <tbody>
-              {criteres.map((critere) => (
+              {criteresActifs.map((critere) => (
                 <tr
                   key={critere.id}
                   className="border-b border-stone-100 dark:border-neutral-700"

@@ -71,7 +71,7 @@ export default function ClientNotePage({ niveauConfig, eleve, phaseSaisie }: Cli
           )}
         </header>
 
-        <FormulaireNotes eleveId={eleve.id} />
+        <FormulaireNotes eleveId={eleve.id} noHifdh={niveauConfig.noHifdh === true} />
       </div>
     </main>
   );

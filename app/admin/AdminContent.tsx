@@ -167,7 +167,9 @@ export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds 
                     </h3>
                     <p className="shrink-0 tabular-nums text-2xl font-normal text-amber-700 dark:text-amber-500">
                       {moyenne.toFixed(1)}
-                      <span className="text-base font-normal text-stone-500 dark:text-stone-400"> {lang === 'ar' ? '/ ١٠٠' : '/ 100'}</span>
+                      <span className="text-base font-normal text-stone-500 dark:text-stone-400">
+                        {' '}{lang === 'ar' ? (currentNiveau.noHifdh ? '/ ٧٥' : '/ ١٠٠') : (currentNiveau.noHifdh ? '/ 75' : '/ 100')}
+                      </span>
                     </p>
                     <div className="flex w-full flex-col gap-4 sm:w-auto sm:min-w-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-4">
                       <PublishToggle notes={notes} />
@@ -195,6 +197,8 @@ export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds 
       {detailsForEleveId && (() => {
         const notes = groupedByEleve[detailsForEleveId] ?? [];
         const titreEleve = notes[0] ? noteEleveDisplayName(notes[0]) : '';
+        const isNoHifdh = currentNiveau?.noHifdh === true;
+        const maxTotal = isNoHifdh ? 75 : 100;
         return (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -241,7 +245,9 @@ export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds 
                         <div className="flex items-center gap-2">
                           <p className="text-xl font-normal text-stone-800 dark:text-stone-100">
                             {note.total}
-                            <span className="text-sm text-stone-500 dark:text-stone-400"> {lang === 'ar' ? '/ ١٠٠' : '/ 100'}</span>
+                            <span className="text-sm text-stone-500 dark:text-stone-400">
+                              {' '}{lang === 'ar' ? `/ ${maxTotal === 75 ? '٧٥' : '١٠٠'}` : `/ ${maxTotal}`}
+                            </span>
                           </p>
                           <button
                             onClick={() => setEditingNote(note)}
@@ -259,6 +265,7 @@ export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds 
                           {Object.entries(scoresCriteres).map(([critereId, score]) => {
                             const critere = criteresMap[critereId];
                             if (!critere) return null;
+                            if (isNoHifdh && critereId === 'hifdh') return null;
                             return (
                               <div
                                 key={critereId}

@@ -34,6 +34,8 @@ export type Niveau = {
   description: string;
   color: string;
   isHifdh?: boolean;
+  /** Niveaux où la mémorisation (hifdh) n'est pas évaluée (ex. récitation avec Coran). */
+  noHifdh?: boolean;
 };
 
 // Configuration des niveaux (labels, couleurs, descriptions)
@@ -112,6 +114,7 @@ export const niveauxConfig: Niveau[] = [
     labelAr: 'التلاوة بالمصحف',
     description: 'Récitation avec support du Coran',
     color: '#bbf7d0',
+    noHifdh: true,
   },
 ];
 
