@@ -190,10 +190,10 @@ export default function ClientResultats(props: ClientResultatsProps) {
                             {/* Détail : une section par jury */}
                             {isExpanded && (
                               <div className="border-t border-stone-100 bg-stone-50 px-4 pb-4 pt-3 dark:border-neutral-700 dark:bg-neutral-900/40 space-y-4">
-                                {eleve.notes.map((note) => {
+                                {eleve.notes.map((note, noteIdx) => {
                                   const { observations, ...scoresCriteres } = note.scores as Record<string, number | string>;
                                   return (
-                                    <div key={note.jury} className="space-y-2">
+                                    <div key={`${note.jury}-${noteIdx}`} className="space-y-2">
                                       <div className="flex items-center justify-between">
                                         <p className="text-xs font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">
                                           {note.jury}
