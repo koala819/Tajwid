@@ -91,6 +91,126 @@ export async function getQualifiedIdsForPhase(phase: string): Promise<string[]> 
   return (data ?? []).map((row: { eleve_id: string }) => row.eleve_id);
 }
 
+export type NoteJury = {
+  jury: string;
+  total: number;
+  moyenne: number;
+  scores: Record<string, number | string>;
+};
+
+export type EleveResultat = {
+  id: string;
+  nom: string;
+  prenom: string;
+  name: string;
+  niveau: string;
+  qualified: boolean;
+  notes: NoteJury[];
+  /** Moyenne globale calculée depuis les notes (null si aucune note) */
+  moyenneGlobale: number | null;
+};
+
+export type NiveauResultat = {
+  slug: string;
+  label: string;
+  labelAr: string;
+  eleves: EleveResultat[];
+};
+
+/**
+ * Pour chaque élève de la base :
+ * - vérifie s'il est qualifié (table qualifications, phase = phaseSaisie)
+ * - récupère ses notes (table notes, phase = phaseSaisie)
+ * Retourne les niveaux qui ont au moins un élève avec une note ou une qualification.
+ */
+export async function getResultatsByPhase(
+  phaseSaisie: string,
+  niveauxExclus: string[] = [],
+): Promise<NiveauResultat[]> {
+  const supabase = getSupabaseClient();
+
+  const [elevesRes, qualifsRes, notesRes] = await Promise.all([
+    supabase.from('eleves').select('id, nom, prenom, niveau').order('nom', { ascending: true }),
+    (supabase.from('qualifications' as never) as any)
+      .select('eleve_id')
+      .eq('phase', phaseSaisie),
+    supabase
+      .from('notes')
+      .select('eleve_id, jury, total, moyenne, scores')
+      .eq('phase', phaseSaisie),
+  ]);
+
+  if (elevesRes.error) {
+    console.error('[getResultatsByPhase] eleves:', elevesRes.error.message);
+    return [];
+  }
+
+  const qualifiedIds = new Set<string>(
+    (qualifsRes.data ?? []).map((r: { eleve_id: string }) => r.eleve_id),
+  );
+
+  const notesByEleve = (
+    (notesRes.data ?? []) as {
+      eleve_id: string;
+      jury: string;
+      total: number;
+      moyenne: number;
+      scores: Record<string, number | string>;
+    }[]
+  ).reduce<Record<string, NoteJury[]>>((acc, n) => {
+    acc[n.eleve_id] = acc[n.eleve_id] ?? [];
+    acc[n.eleve_id].push({ jury: n.jury, total: n.total, moyenne: n.moyenne, scores: n.scores });
+    return acc;
+  }, {});
+
+  // Regrouper par niveau en respectant l'ordre de niveauxConfig
+  const byNiveau: Record<string, EleveResultat[]> = {};
+
+  for (const eleve of elevesRes.data ?? []) {
+    const isQualified = qualifiedIds.has(eleve.id);
+    const eleveNotes = notesByEleve[eleve.id] ?? [];
+
+    // N'afficher que les élèves qui ont une note ou une qualification pour cette phase
+    if (!isQualified && eleveNotes.length === 0) continue;
+
+    const moyenneGlobale =
+      eleveNotes.length > 0
+        ? eleveNotes.reduce((s, n) => s + n.total, 0) / eleveNotes.length
+        : null;
+
+    const resultat: EleveResultat = {
+      id: eleve.id,
+      nom: eleve.nom,
+      prenom: eleve.prenom,
+      name: `${eleve.prenom} ${eleve.nom}`,
+      niveau: eleve.niveau,
+      qualified: isQualified,
+      notes: eleveNotes.sort((a, b) => a.jury.localeCompare(b.jury, 'fr')),
+      moyenneGlobale,
+    };
+
+    byNiveau[eleve.niveau] = byNiveau[eleve.niveau] ?? [];
+    byNiveau[eleve.niveau].push(resultat);
+  }
+
+  return niveauxConfig
+    .filter((n) => !niveauxExclus.includes(n.slug) && byNiveau[n.slug]?.length)
+    .map((n) => ({
+      slug: n.slug,
+      label: n.label,
+      labelAr: n.labelAr,
+      noHifdh: n.noHifdh,
+      eleves: (byNiveau[n.slug] ?? []).sort((a, b) => {
+        // Qualifiés d'abord, puis par moyenne décroissante, puis alphabétique
+        if (b.qualified !== a.qualified) return b.qualified ? 1 : -1;
+        const ma = a.moyenneGlobale ?? -1;
+        const mb = b.moyenneGlobale ?? -1;
+        if (mb !== ma) return mb - ma;
+        return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
+      }),
+    }));
+}
+
 export async function findEleve(niveauSlug: string, eleveSlug: string) {
   const niveaux = await getNiveauxWithEleves();
   const niveau = niveaux.find((n) => n.slug === niveauSlug);

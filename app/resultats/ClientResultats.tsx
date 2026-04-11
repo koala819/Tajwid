@@ -4,27 +4,20 @@ import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
 import LanguageSwitch from '@/components/LanguageSwitch';
-import { getNiveauxPhaseResultats, niveauxConfig } from '@/data/niveaux';
-import type { Eleve } from '@/data/niveaux';
+import { getNiveauxPhaseResultats } from '@/data/niveaux';
+import type { NiveauResultat } from '@/lib/eleves';
 import type { ResultatPhase } from '@/lib/notes';
 import type { PhaseSaisie } from '@/lib/phaseSaisie';
-
-type NiveauWithEleves = {
-  slug: string;
-  label: string;
-  labelAr: string;
-  eleves: Eleve[];
-};
+import { criteres } from '@/data/criteres';
 
 type ClientResultatsProps =
   | {
-      phaseSaisie: 'qualification';
-      niveauxWithEleves: NiveauWithEleves[];
+      phaseSaisie: 'qualification' | 'demi_finale';
+      niveaux: NiveauResultat[];
       totalParticipants: number;
-      qualifiedIds: string[];
     }
   | {
-      phaseSaisie: 'demi_finale' | 'finale';
+      phaseSaisie: 'finale';
       resultatsParNiveau: ResultatPhase[][];
     };
 
@@ -41,11 +34,9 @@ export default function ClientResultats(props: ClientResultatsProps) {
   const isAr = lang === 'ar';
   const { phaseSaisie } = props;
 
-  const niveauxPourOnglets =
-    phaseSaisie === 'qualification' ? props.niveauxWithEleves : [];
-  const [selectedNiveau, setSelectedNiveau] = useState<string>(
-    niveauxPourOnglets[0]?.slug ?? '',
-  );
+  const niveauxOnglets = phaseSaisie !== 'finale' ? props.niveaux : [];
+  const [selectedNiveau, setSelectedNiveau] = useState<string>(niveauxOnglets[0]?.slug ?? '');
+  const [expandedEleveId, setExpandedEleveId] = useState<string | null>(null);
 
   const title =
     phaseSaisie === 'qualification'
@@ -61,15 +52,11 @@ export default function ClientResultats(props: ClientResultatsProps) {
         ? t('resultsDemiFinaleSubtitle', lang)
         : t('resultsFinaleSubtitle', lang);
 
-  const qualifiedSet =
-    phaseSaisie === 'qualification' ? new Set(props.qualifiedIds) : null;
-
   return (
-    <div
-      className="min-h-screen bg-stone-50 dark:bg-neutral-900"
-      dir={isAr ? 'rtl' : 'ltr'}
-    >
+    <div className="min-h-screen bg-stone-50 dark:bg-neutral-900" dir={isAr ? 'rtl' : 'ltr'}>
       <main className="mx-auto max-w-4xl space-y-8 px-4 py-10 md:py-16">
+
+        {/* En-tête */}
         <header className="flex flex-col items-center gap-5 border-b border-stone-200 pb-8 dark:border-neutral-700 md:gap-6">
           <div className="flex w-full items-center justify-end">
             <LanguageSwitch />
@@ -85,8 +72,7 @@ export default function ClientResultats(props: ClientResultatsProps) {
             </h1>
             <p className="mx-auto max-w-xl text-base text-stone-600 dark:text-stone-300">{subtitle}</p>
           </div>
-
-          {phaseSaisie === 'qualification' && (
+          {phaseSaisie !== 'finale' && (
             <div className="flex items-baseline justify-center gap-3">
               <span className="text-5xl font-extralight text-amber-700 dark:text-amber-500">
                 {props.totalParticipants}
@@ -98,29 +84,33 @@ export default function ClientResultats(props: ClientResultatsProps) {
           )}
         </header>
 
-        {phaseSaisie === 'qualification' && (
+        {/* Vue qualification / demi-finale : onglets + liste */}
+        {phaseSaisie !== 'finale' && (
           <>
-            {props.niveauxWithEleves.length === 0 ? (
+            {props.niveaux.length === 0 ? (
               <div className="rounded-lg border border-stone-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800 sm:p-12">
                 <p className="text-stone-500 dark:text-stone-400">{t('noQualifResults', lang)}</p>
               </div>
             ) : (
               <>
-                {/* Onglets par niveau */}
+                {/* Onglets */}
                 <div className="-mx-4 border-b border-stone-200 dark:border-neutral-700">
                   <div
                     className="flex snap-x snap-mandatory gap-1 overflow-x-auto overscroll-x-contain px-4 pb-1 sm:gap-2 sm:px-0 [-webkit-overflow-scrolling:touch]"
                     role="tablist"
                   >
-                    {props.niveauxWithEleves.map((niveau) => {
-                      const qualifiedCount = niveau.eleves.filter((e) => qualifiedSet?.has(e.id)).length;
+                    {props.niveaux.map((niveau) => {
+                      const qualifCount = niveau.eleves.filter((e) => e.qualified).length;
                       return (
                         <button
                           key={niveau.slug}
                           type="button"
                           role="tab"
                           aria-selected={selectedNiveau === niveau.slug}
-                          onClick={() => setSelectedNiveau(niveau.slug)}
+                          onClick={() => {
+                            setSelectedNiveau(niveau.slug);
+                            setExpandedEleveId(null);
+                          }}
                           className={`shrink-0 snap-start border-b-2 px-3 py-3 text-sm font-normal transition-colors min-[480px]:px-5 sm:px-6 ${
                             selectedNiveau === niveau.slug
                               ? 'border-amber-600 text-amber-700 dark:border-amber-500 dark:text-amber-400'
@@ -131,9 +121,9 @@ export default function ClientResultats(props: ClientResultatsProps) {
                           <span className="whitespace-nowrap">
                             {isAr ? niveau.labelAr : niveau.label}
                           </span>
-                          {qualifiedCount > 0 && (
+                          {qualifCount > 0 && (
                             <span className="ms-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs tabular-nums text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                              {qualifiedCount}
+                              {qualifCount}
                             </span>
                           )}
                         </button>
@@ -142,56 +132,123 @@ export default function ClientResultats(props: ClientResultatsProps) {
                   </div>
                 </div>
 
-                {/* Liste des élèves du niveau sélectionné */}
+                {/* Liste des élèves */}
                 {(() => {
-                  const niveau = props.niveauxWithEleves.find((n) => n.slug === selectedNiveau);
+                  const niveau = props.niveaux.find((n) => n.slug === selectedNiveau);
                   if (!niveau) return null;
-
-                  const elevesSorted = [...niveau.eleves].sort((a, b) => {
-                    const isQualA = qualifiedSet?.has(a.id) ? 1 : 0;
-                    const isQualB = qualifiedSet?.has(b.id) ? 1 : 0;
-                    if (isQualB !== isQualA) return isQualB - isQualA;
-                    const ma = a.moyenne_qualif ?? -1;
-                    const mb = b.moyenne_qualif ?? -1;
-                    if (mb !== ma) return mb - ma;
-                    return a.prenom.localeCompare(b.prenom, 'fr', { sensitivity: 'base' });
-                  });
+                  const noHifdh = (niveau as NiveauResultat & { noHifdh?: boolean }).noHifdh;
+                  const maxScore = noHifdh ? 75 : 100;
 
                   return (
-                    <div className="space-y-2 overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
-                      {elevesSorted.map((eleve) => {
-                        const isQualified = qualifiedSet?.has(eleve.id) ?? false;
+                    <div className="overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+                      {niveau.eleves.map((eleve) => {
+                        const isExpanded = expandedEleveId === eleve.id;
+                        const score = eleve.moyenneGlobale;
+
                         return (
-                          <div
-                            key={eleve.id}
-                            className="flex flex-col gap-3 border-b border-stone-100 p-4 last:border-b-0 dark:border-neutral-700 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5"
-                          >
-                            <h3 className="text-base font-normal text-stone-800 dark:text-stone-100 sm:text-lg">
-                              {eleve.name}
-                            </h3>
-                            <div className="flex items-center gap-3">
-                              {eleve.moyenne_qualif != null && (
-                                <p className="tabular-nums text-xl font-normal text-amber-700 dark:text-amber-500 sm:text-2xl">
-                                  {eleve.moyenne_qualif}
-                                  <span className="text-sm font-normal text-stone-400 dark:text-stone-500">/100</span>
-                                </p>
-                              )}
-                              {isQualified ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                  <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
-                                  </svg>
-                                  {isAr ? 'مؤهَّل' : 'Qualifié'}
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-sm font-medium text-stone-400 dark:bg-neutral-700 dark:text-stone-500">
-                                  <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                                  </svg>
-                                  {isAr ? 'غير مؤهَّل' : 'Non qualifié'}
-                                </span>
-                              )}
+                          <div key={eleve.id} className="border-b border-stone-100 last:border-b-0 dark:border-neutral-700">
+
+                            {/* Ligne principale */}
+                            <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+                              <h3 className="min-w-0 flex-1 text-base font-normal text-stone-800 dark:text-stone-100 sm:text-lg">
+                                {eleve.name}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                                {score != null && (
+                                  <p className="tabular-nums text-xl font-normal text-amber-700 dark:text-amber-500 sm:text-2xl">
+                                    {score % 1 === 0 ? score : score.toFixed(1)}
+                                    <span className="text-sm font-normal text-stone-400 dark:text-stone-500">/{maxScore}</span>
+                                  </p>
+                                )}
+                                {eleve.qualified ? (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                                    </svg>
+                                    {isAr ? 'مؤهَّل' : 'Qualifié'}
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-sm font-medium text-stone-400 dark:bg-neutral-700 dark:text-stone-500">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                      <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                                    </svg>
+                                    {isAr ? 'غير مؤهَّل' : 'Non qualifié'}
+                                  </span>
+                                )}
+                                {eleve.notes.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedEleveId(isExpanded ? null : eleve.id)}
+                                    className="rounded-lg border border-stone-200 px-3 py-1.5 text-xs text-stone-500 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 dark:border-neutral-600 dark:text-stone-400 dark:hover:border-amber-600 dark:hover:bg-amber-900/20 dark:hover:text-amber-400"
+                                  >
+                                    {isExpanded ? (isAr ? 'إخفاء' : 'Masquer') : (isAr ? 'التفاصيل' : 'Détail')}
+                                  </button>
+                                )}
+                              </div>
                             </div>
+
+                            {/* Détail : une section par jury */}
+                            {isExpanded && (
+                              <div className="border-t border-stone-100 bg-stone-50 px-4 pb-4 pt-3 dark:border-neutral-700 dark:bg-neutral-900/40 space-y-4">
+                                {eleve.notes.map((note) => {
+                                  const { observations, ...scoresCriteres } = note.scores as Record<string, number | string>;
+                                  return (
+                                    <div key={note.jury} className="space-y-2">
+                                      <div className="flex items-center justify-between">
+                                        <p className="text-xs font-medium uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                                          {note.jury}
+                                        </p>
+                                        <p className="tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
+                                          {note.total}/{maxScore}
+                                        </p>
+                                      </div>
+                                      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                                        {criteres
+                                          .filter((c) => !(noHifdh && c.id === 'hifdh'))
+                                          .filter((c) => scoresCriteres[c.id] !== undefined)
+                                          .map((c) => {
+                                            const val = scoresCriteres[c.id] as number;
+                                            const pct = val / c.max;
+                                            const barColor =
+                                              pct >= 0.8
+                                                ? 'bg-emerald-400 dark:bg-emerald-500'
+                                                : pct >= 0.5
+                                                  ? 'bg-amber-400 dark:bg-amber-500'
+                                                  : 'bg-red-400 dark:bg-red-500';
+                                            return (
+                                              <div
+                                                key={c.id}
+                                                className="rounded-md border border-stone-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+                                                dir={isAr ? 'rtl' : 'ltr'}
+                                              >
+                                                <div className="flex items-center justify-between gap-2">
+                                                  <p className="truncate text-xs text-stone-500 dark:text-stone-400">
+                                                    {isAr ? c.label : c.labelFr}
+                                                  </p>
+                                                  <span className="shrink-0 tabular-nums text-sm font-medium text-stone-700 dark:text-stone-200">
+                                                    {val}/{c.max}
+                                                  </span>
+                                                </div>
+                                                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-stone-100 dark:bg-neutral-700">
+                                                  <div
+                                                    className={`h-full rounded-full ${barColor} transition-all`}
+                                                    style={{ width: `${Math.min(pct * 100, 100)}%` }}
+                                                  />
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
+                                      </div>
+                                      {typeof observations === 'string' && observations && (
+                                        <p className="rounded-md bg-white px-3 py-2 text-sm text-stone-600 dark:bg-neutral-800 dark:text-stone-300 border border-stone-200 dark:border-neutral-700">
+                                          {observations}
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -203,7 +260,8 @@ export default function ClientResultats(props: ClientResultatsProps) {
           </>
         )}
 
-        {(phaseSaisie === 'demi_finale' || phaseSaisie === 'finale') && (
+        {/* Vue finale : notes publiées */}
+        {phaseSaisie === 'finale' && (
           <div className="space-y-12">
             {niveauxPhaseResultats.map((niveauConfig, i) => {
               const resultats = props.resultatsParNiveau[i] ?? [];
@@ -211,9 +269,7 @@ export default function ClientResultats(props: ClientResultatsProps) {
               return (
                 <section key={niveauConfig.slug} className="space-y-6">
                   <div className="rounded-lg border border-stone-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800 sm:p-6">
-                    <p
-                      className={`text-lg font-normal text-stone-700 dark:text-stone-200 ${isAr ? 'text-right' : 'text-left'}`}
-                    >
+                    <p className={`text-lg font-normal text-stone-700 dark:text-stone-200 ${isAr ? 'text-right' : 'text-left'}`}>
                       {isAr ? niveauConfig.labelAr : niveauConfig.label}
                     </p>
                   </div>
@@ -223,12 +279,12 @@ export default function ClientResultats(props: ClientResultatsProps) {
                       return (
                         <div
                           key={`${r.niveau}-${r.eleve}`}
-                          className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-6"
+                          className="flex items-center justify-between rounded-lg border border-stone-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 sm:p-6"
                         >
                           <h3 className="text-lg font-normal text-stone-800 dark:text-stone-100 sm:text-xl">
                             {r.eleve}
                           </h3>
-                          <p className="text-2xl font-normal text-amber-700 dark:text-amber-500 sm:text-3xl">
+                          <p className="tabular-nums text-2xl font-normal text-amber-700 dark:text-amber-500 sm:text-3xl">
                             {r.moyenne.toFixed(1)}
                             <span className="text-base font-normal text-stone-500 dark:text-stone-400">/{maxScore}</span>
                           </p>

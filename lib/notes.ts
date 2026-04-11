@@ -30,6 +30,66 @@ export type ResultatPhase = {
   nbJurys: number;
 };
 
+export type NoteDetailEleve = {
+  eleveId: string;
+  moyenne: number;
+  nbJurys: number;
+  /** Moyenne par critère (clé = critère id, valeur = moyenne arrondie à 1 décimale) */
+  scoresMoyens: Record<string, number>;
+};
+
+/**
+ * Notes publiées pour une liste d'élèves, avec moyenne et détail par critère.
+ * Utilisé sur la page résultats pour afficher les points forts/faibles.
+ */
+export async function getPublishedNotesForStudents(
+  eleveIds: string[],
+): Promise<NoteDetailEleve[]> {
+  if (eleveIds.length === 0) return [];
+
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from('notes')
+    .select('eleve_id, total, scores')
+    .eq('publie', true)
+    .in('eleve_id', eleveIds);
+
+  if (error) {
+    console.error('[getPublishedNotesForStudents]', error.message);
+    return [];
+  }
+
+  const byEleve = (data ?? []).reduce<Record<string, { total: number; scores: Record<string, number | string> }[]>>(
+    (acc, note) => {
+      acc[note.eleve_id] = acc[note.eleve_id] ?? [];
+      acc[note.eleve_id].push(note as { total: number; scores: Record<string, number | string> });
+      return acc;
+    },
+    {},
+  );
+
+  return Object.entries(byEleve).map(([eleveId, notes]) => {
+    const moyenne = notes.reduce((s, n) => s + n.total, 0) / notes.length;
+
+    // Cumul des scores par critère
+    const cumul: Record<string, number> = {};
+    for (const note of notes) {
+      for (const [id, val] of Object.entries(note.scores)) {
+        if (typeof val === 'number') {
+          cumul[id] = (cumul[id] ?? 0) + val;
+        }
+      }
+    }
+
+    const scoresMoyens: Record<string, number> = {};
+    for (const [id, total] of Object.entries(cumul)) {
+      scoresMoyens[id] = Math.round((total / notes.length) * 10) / 10;
+    }
+
+    return { eleveId, moyenne, nbJurys: notes.length, scoresMoyens };
+  });
+}
+
 /**
  * Résultats publiés pour une phase (demi_finale ou finale), groupés par niveau.
  * Un élève n’apparaît que s’il a au moins 2 notes publiées.
