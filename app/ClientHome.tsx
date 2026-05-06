@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
+import type { PhaseSaisie } from '@/lib/phaseSaisie';
 import LogoutButton from '@/components/LogoutButton';
 import LanguageSwitch from '@/components/LanguageSwitch';
 
@@ -17,6 +18,7 @@ type ClientHomeProps = {
   creneaux: Creneau[];
   totalParticipants: number;
   authenticated: boolean;
+  phaseSaisie: PhaseSaisie;
 };
 
 function safeInternalPath(redirect: string | null): string | null {
@@ -24,13 +26,19 @@ function safeInternalPath(redirect: string | null): string | null {
   return redirect;
 }
 
-export default function ClientHome({ creneaux, totalParticipants, authenticated }: ClientHomeProps) {
+export default function ClientHome({ creneaux, totalParticipants, authenticated, phaseSaisie }: ClientHomeProps) {
   const lang = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const phaseTitleKey =
+    phaseSaisie === 'qualification'
+      ? 'phaseQualification'
+      : phaseSaisie === 'finale'
+        ? 'phaseFinale'
+        : 'phaseDemiFinale';
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -76,7 +84,7 @@ export default function ClientHome({ creneaux, totalParticipants, authenticated 
           </div>
           <h1 className="text-4xl font-light tracking-tight text-stone-800 dark:text-stone-100 md:text-5xl" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <span className="block">{t('titleLine1', lang)}</span>
-            <span className="block text-amber-700 dark:text-amber-500">{t('titleLine2', lang)}</span>
+            <span className="block text-amber-700 dark:text-amber-500">{t(phaseTitleKey, lang)}</span>
           </h1>
         </header>
 

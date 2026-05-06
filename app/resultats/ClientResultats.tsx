@@ -54,12 +54,6 @@ type ClientResultatsProps =
 
 const niveauxPhaseResultats = getNiveauxPhaseResultats();
 
-function phaseLabelKey(phase: PhaseSaisie): 'phaseQualification' | 'phaseDemiFinale' | 'phaseFinale' {
-  if (phase === 'qualification') return 'phaseQualification';
-  if (phase === 'finale') return 'phaseFinale';
-  return 'phaseDemiFinale';
-}
-
 export default function ClientResultats(props: ClientResultatsProps) {
   const lang = useLanguage();
   const isAr = lang === 'ar';
@@ -92,11 +86,6 @@ export default function ClientResultats(props: ClientResultatsProps) {
           <div className="flex w-full items-center justify-end">
             <LanguageSwitch />
           </div>
-          <p className="w-full max-w-2xl rounded-lg bg-amber-50 px-4 py-3 text-center text-sm text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
-            <span className="font-medium">{t(phaseLabelKey(phaseSaisie), lang)}</span>
-            {' · '}
-            {t('resultsPhaseEnvHint', lang)}
-          </p>
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-light tracking-tight text-stone-800 dark:text-stone-100 md:text-5xl">
               {title}

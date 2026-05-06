@@ -79,7 +79,7 @@ export async function getNiveauxWithEleves(creneau?: string, qualificationFilter
 
 export async function getQualifiedIdsForPhase(phase: string): Promise<string[]> {
   const supabaseClient = getSupabaseClient();
-  const { data, error } = await (supabaseClient.from('qualifications' as never) as any)
+  const { data, error } = await (supabaseClient.from('qualifications'))
     .select('eleve_id')
     .eq('phase', phase);
 
@@ -129,12 +129,16 @@ export async function getResultatsByPhase(
   niveauxExclus: string[] = [],
 ): Promise<NiveauResultat[]> {
   const supabase = getSupabaseClient();
+  const phasesQualificationSource =
+    phaseSaisie === 'finale' ? (['demi_finale', 'finale'] as const) : ([phaseSaisie] as const);
 
   const [elevesRes, qualifsRes, notesRes] = await Promise.all([
     supabase.from('eleves').select('id, nom, prenom, niveau').order('nom', { ascending: true }),
-    (supabase.from('qualifications' as never) as any)
+    (supabase.from('qualifications'))
       .select('eleve_id')
-      .eq('phase', phaseSaisie),
+      // En finale, on considère automatiquement les qualifiés de demi-finale
+      // (et les éventuels enregistrements explicites déjà en finale).
+      .in('phase', phasesQualificationSource),
     supabase
       .from('notes')
       .select('eleve_id, jury, total, moyenne, scores, recorded_at')

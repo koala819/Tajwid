@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
-import { getElevesByNiveau } from '@/lib/eleves';
+import { getResultatsByPhase } from '@/lib/eleves';
 import { isAuthenticated } from '@/lib/auth';
+import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 import ClientHome from './ClientHome';
 
 export const dynamic = 'force-dynamic';
@@ -14,10 +15,11 @@ const creneaux = [
 
 export default async function Home() {
   const authenticated = await isAuthenticated();
+  const phaseSaisie = getPhaseSaisieFromEnv();
 
-  // Compter le total de participants
-  const allEleves = await getElevesByNiveau();
-  const totalParticipants = allEleves.length;
+  // Compter les participants de la phase courante (pas le total global des élèves)
+  const niveauxPhase = await getResultatsByPhase(phaseSaisie);
+  const totalParticipants = niveauxPhase.reduce((sum, niveau) => sum + niveau.eleves.length, 0);
 
   return (
     <Suspense
@@ -31,6 +33,7 @@ export default async function Home() {
         creneaux={creneaux}
         totalParticipants={totalParticipants}
         authenticated={authenticated}
+        phaseSaisie={phaseSaisie}
       />
     </Suspense>
   );
