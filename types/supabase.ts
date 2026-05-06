@@ -74,7 +74,7 @@ export type EnseignantInsert = {
 };
 
 export type Database = {
-  public: {
+  tajwid: {
     Tables: {
       notes: {
         Row: NoteRow;

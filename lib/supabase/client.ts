@@ -16,7 +16,9 @@ export function getSupabaseClient() {
   ensureSupabaseCredentials();
 
   if (!supabaseClient) {
-    supabaseClient = createClient<Database>(supabaseUrl!, supabaseAnonKey!);
+    supabaseClient = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+      db: { schema: 'tajwid' },
+    });
   }
 
   return supabaseClient;
