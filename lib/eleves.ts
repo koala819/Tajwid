@@ -224,7 +224,10 @@ export async function getResultatsByPhase(
     const eleveNotes = (notesByEleve[eleve.id] ?? [])
       .sort((a, b) => (a.recorded_at ?? '').localeCompare(b.recorded_at ?? ''));
 
-    if (passesTourPrecedent != null) {
+    if (phase === 'demi_finale' && passesTourPrecedent != null) {
+      /* Qualifiés en qualification, ou déjà une note demi-finale (relecture sans lignes `qualification` en base). */
+      if (!passesTourPrecedent.has(eleve.id) && eleveNotes.length === 0) continue;
+    } else if (phase === 'finale' && passesTourPrecedent != null) {
       if (!passesTourPrecedent.has(eleve.id)) continue;
     } else if (!qualifiePourSuite.has(eleve.id) && eleveNotes.length === 0) {
       continue;
