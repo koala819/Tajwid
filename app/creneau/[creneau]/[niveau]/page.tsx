@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { findNiveauConfig } from '@/data/niveaux';
-import { getNiveauxWithEleves } from '@/lib/eleves';
+import { getNiveauxWithEleves, getEligibleEleveIdsForNotesPhase } from '@/lib/eleves';
 import { getEnseignantsPourNotes } from '@/lib/enseignants';
+import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 import ClientNiveauEleves from './ClientNiveauEleves';
 
 export const dynamic = 'force-dynamic';
@@ -31,13 +32,17 @@ export default async function ElevesPage(props: PageProps) {
     notFound();
   }
 
-  const [niveauxWithEleves, enseignantsPourNotes] = await Promise.all([
+  const phaseSaisie = getPhaseSaisieFromEnv();
+  const [niveauxWithEleves, enseignantsPourNotes, eligibleIds] = await Promise.all([
     getNiveauxWithEleves(creneau),
     getEnseignantsPourNotes(),
+    getEligibleEleveIdsForNotesPhase(phaseSaisie),
   ]);
 
   const niveauData = niveauxWithEleves.find((n) => n.slug === niveauSlug);
-  const elevesForNiveau = niveauData?.eleves ?? [];
+  const elevesBruts = niveauData?.eleves ?? [];
+  const elevesForNiveau =
+    eligibleIds == null ? elevesBruts : elevesBruts.filter((e) => eligibleIds.has(e.id));
 
   return (
     <ClientNiveauEleves

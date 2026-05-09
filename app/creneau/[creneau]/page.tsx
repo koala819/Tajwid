@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { niveauxConfig } from '@/data/niveaux';
-import { getElevesByNiveau } from '@/lib/eleves';
+import { getElevesByNiveau, getEligibleEleveIdsForNotesPhase } from '@/lib/eleves';
+import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
 import ClientCreneau from './ClientCreneau';
 
 export const dynamic = 'force-dynamic';
@@ -27,12 +28,19 @@ export default async function CreneauPage(props: PageProps) {
     notFound();
   }
 
+  const phaseSaisie = getPhaseSaisieFromEnv();
+  const eligibleIds = await getEligibleEleveIdsForNotesPhase(phaseSaisie);
+
   // Charger tous les élèves du créneau
   const elevesFromDb = await getElevesByNiveau(creneau);
 
-  // Compter les élèves par niveau
+  // Compter les élèves par niveau (filtrés hors qualification si demi-finale / finale)
   const niveauxAvecComptage = niveauxConfig.map((niveau) => {
-    const count = elevesFromDb.filter((e) => e.niveau === niveau.slug).length;
+    const count = elevesFromDb.filter((e) => {
+      if (e.niveau !== niveau.slug) return false;
+      if (eligibleIds == null) return true;
+      return eligibleIds.has(e.id);
+    }).length;
     return {
       ...niveau,
       count,

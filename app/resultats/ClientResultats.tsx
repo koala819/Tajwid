@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { t } from '@/data/translations';
 import LanguageSwitch from '@/components/LanguageSwitch';
-import { getNiveauxPhaseResultats } from '@/data/niveaux';
 import type { NiveauResultat } from '@/lib/eleves';
-import type { ResultatPhase } from '@/lib/notes';
 import type { PhaseSaisie } from '@/lib/phaseSaisie';
 import { criteres } from '@/data/criteres';
 import type { NoteJury } from '@/lib/eleves';
@@ -41,25 +39,18 @@ function juryLabels(notes: NoteJury[]): string[] {
   return labels;
 }
 
-type ClientResultatsProps =
-  | {
-      phaseSaisie: 'qualification' | 'demi_finale';
-      niveaux: NiveauResultat[];
-      totalParticipants: number;
-    }
-  | {
-      phaseSaisie: 'finale';
-      resultatsParNiveau: ResultatPhase[][];
-    };
-
-const niveauxPhaseResultats = getNiveauxPhaseResultats();
+type ClientResultatsProps = {
+  phaseSaisie: PhaseSaisie;
+  niveaux: NiveauResultat[];
+  totalParticipants: number;
+};
 
 export default function ClientResultats(props: ClientResultatsProps) {
   const lang = useLanguage();
   const isAr = lang === 'ar';
   const { phaseSaisie } = props;
 
-  const niveauxOnglets = phaseSaisie !== 'finale' ? props.niveaux : [];
+  const niveauxOnglets = props.niveaux;
   const [selectedNiveau, setSelectedNiveau] = useState<string>(niveauxOnglets[0]?.slug ?? '');
   const [expandedEleveId, setExpandedEleveId] = useState<string | null>(null);
 
@@ -92,24 +83,30 @@ export default function ClientResultats(props: ClientResultatsProps) {
             </h1>
             <p className="mx-auto max-w-xl text-base text-stone-600 dark:text-stone-300">{subtitle}</p>
           </div>
-          {phaseSaisie !== 'finale' && (
-            <div className="flex items-baseline justify-center gap-3">
-              <span className="text-5xl font-extralight text-amber-700 dark:text-amber-500">
-                {props.totalParticipants}
-              </span>
-              <span className="text-sm uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                {t('participants', lang)}
-              </span>
-            </div>
-          )}
+          <div className="flex items-baseline justify-center gap-3">
+            <span className="text-5xl font-extralight text-amber-700 dark:text-amber-500">
+              {props.totalParticipants}
+            </span>
+            <span className="text-sm uppercase tracking-wider text-stone-500 dark:text-stone-400">
+              {t('participants', lang)}
+            </span>
+          </div>
         </header>
 
-        {/* Vue qualification / demi-finale : onglets + liste */}
-        {phaseSaisie !== 'finale' && (
-          <>
+        {/* Onglets + liste (qualification, demi-finale, finale) */}
+        <>
             {props.niveaux.length === 0 ? (
               <div className="rounded-lg border border-stone-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800 sm:p-12">
-                <p className="text-stone-500 dark:text-stone-400">{t('noQualifResults', lang)}</p>
+                {phaseSaisie === 'finale' ? (
+                  <>
+                    <p className="text-stone-600 dark:text-stone-300">{t('noResultsPhase', lang)}</p>
+                    <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
+                      {t('noResultsPhaseHelp', lang)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-stone-500 dark:text-stone-400">{t('noQualifResults', lang)}</p>
+                )}
               </div>
             ) : (
               <>
@@ -280,54 +277,7 @@ export default function ClientResultats(props: ClientResultatsProps) {
                 })()}
               </>
             )}
-          </>
-        )}
-
-        {/* Vue finale : notes publiées */}
-        {phaseSaisie === 'finale' && (
-          <div className="space-y-12">
-            {niveauxPhaseResultats.map((niveauConfig, i) => {
-              const resultats = props.resultatsParNiveau[i] ?? [];
-              if (resultats.length === 0) return null;
-              return (
-                <section key={niveauConfig.slug} className="space-y-6">
-                  <div className="rounded-lg border border-stone-200 bg-white p-4 dark:border-neutral-700 dark:bg-neutral-800 sm:p-6">
-                    <p className={`text-lg font-normal text-stone-700 dark:text-stone-200 ${isAr ? 'text-right' : 'text-left'}`}>
-                      {isAr ? niveauConfig.labelAr : niveauConfig.label}
-                    </p>
-                  </div>
-                  <div className="space-y-3 sm:space-y-4">
-                    {resultats.map((r) => {
-                      const maxScore = niveauConfig.noHifdh ? 75 : 100;
-                      return (
-                        <div
-                          key={`${r.niveau}-${r.eleve}`}
-                          className="flex items-center justify-between rounded-lg border border-stone-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800 sm:p-6"
-                        >
-                          <h3 className="text-lg font-normal text-stone-800 dark:text-stone-100 sm:text-xl">
-                            {r.eleve}
-                          </h3>
-                          <p className="tabular-nums text-2xl font-normal text-amber-700 dark:text-amber-500 sm:text-3xl">
-                            {r.moyenne.toFixed(1)}
-                            <span className="text-base font-normal text-stone-500 dark:text-stone-400">/{maxScore}</span>
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            })}
-            {props.resultatsParNiveau.every((r) => r.length === 0) && (
-              <div className="rounded-lg border border-stone-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800 sm:p-12">
-                <p className="text-stone-600 dark:text-stone-300">{t('noResultsPhase', lang)}</p>
-                <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
-                  {t('noResultsPhaseHelp', lang)}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+        </>
       </main>
     </div>
   );

@@ -12,3 +12,13 @@ export function getPhaseSaisieFromEnv(): PhaseSaisie {
   }
   return 'demi_finale';
 }
+
+/**
+ * Phase « tour précédent » pour la page résultats : on n’y liste que les élèves
+ * déjà marqués qualifiés (`qualifications`) à la fin de ce tour.
+ */
+export function phasePrecedentePourResultats(phase: PhaseSaisie): PhaseSaisie | null {
+  if (phase === 'demi_finale') return 'qualification';
+  if (phase === 'finale') return 'demi_finale';
+  return null;
+}

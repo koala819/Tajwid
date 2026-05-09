@@ -75,15 +75,17 @@ export default async function AdminPage() {
     (niveau) => grouped[niveau.slug]?.length > 0,
   );
 
-  // Élèves qualifiés pour la phase courante (table `qualifications`)
+  // Pastilles admin : en finale, finalistes = `demi_finale` (API) ou anciennes lignes `finale`
   const eleveIds = [...new Set(levelRows.map((r) => r.eleve_id).filter(Boolean))];
   let qualifiedEleveIds: Set<string> = new Set();
   if (eleveIds.length > 0) {
-    const { data: qualifData } = await getSupabaseClient()
+    const phasesQualifAdmin =
+      phaseSaisie === 'finale' ? (['demi_finale', 'finale'] as const) : [phaseSaisie];
+    const { data: qualifData } = (await getSupabaseClient()
       .from('qualifications')
       .select('eleve_id')
-      .eq('phase', phaseSaisie)
-      .in('eleve_id', eleveIds) as { data: Array<{ eleve_id: string }> | null };
+      .in('eleve_id', eleveIds)
+      .in('phase', phasesQualifAdmin)) as { data: Array<{ eleve_id: string }> | null };
     qualifiedEleveIds = new Set((qualifData ?? []).map((r) => r.eleve_id));
   }
 

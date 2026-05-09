@@ -1,6 +1,7 @@
 import { getSupabaseClient } from '@/lib/supabase/client';
 import type { EleveRow } from '@/types/supabase';
 import { slugify, niveauxConfig } from '@/data/niveaux';
+import { phasePrecedentePourResultats, type PhaseSaisie } from '@/lib/phaseSaisie';
 
 const creneauSlugToLabel: Record<string, string> = {
   'samedi-matin': 'Samedi matin',
@@ -91,6 +92,31 @@ export async function getQualifiedIdsForPhase(phase: string): Promise<string[]> 
   return (data ?? []).map((row: { eleve_id: string }) => row.eleve_id);
 }
 
+/**
+ * Pour les pages `/creneau/...` (saisie des notes) : même règle que les résultats —
+ * en demi-finale, seuls les qualifiés du tour qualification ; en finale, seuls les
+ * qualifiés demi-finale. En phase qualification : `null` (tous les élèves du créneau).
+ */
+export async function getEligibleEleveIdsForNotesPhase(
+  phaseSaisie: PhaseSaisie,
+): Promise<Set<string> | null> {
+  const prec = phasePrecedentePourResultats(phaseSaisie);
+  if (prec == null) return null;
+
+  const supabaseClient = getSupabaseClient();
+  const { data, error } = await supabaseClient
+    .from('qualifications')
+    .select('eleve_id')
+    .eq('phase', prec);
+
+  if (error) {
+    console.error('[getEligibleEleveIdsForNotesPhase]', error.message);
+    return new Set();
+  }
+
+  return new Set((data ?? []).map((row: { eleve_id: string }) => row.eleve_id));
+}
+
 export type NoteJury = {
   jury: string;
   total: number;
@@ -119,26 +145,32 @@ export type NiveauResultat = {
 };
 
 /**
- * Pour chaque élève de la base :
- * - vérifie s'il est qualifié (table qualifications, phase = phaseSaisie)
- * - récupère ses notes (table notes, phase = phaseSaisie)
- * Retourne les niveaux qui ont au moins un élève avec une note ou une qualification.
+ * Page résultats selon `PHASE_SAISIE` :
+ * - qualification : élèves avec au moins une note de qualification, ou pastille qualifié (tour actuel).
+ * - demi_finale : uniquement les élèves qualifiés à la fin du tour **qualification** (phase précédente).
+ * - finale : uniquement les élèves qualifiés à la fin de la **demi-finale** (phase précédente).
+ * La pastille « Qualifié » sur la ligne = qualifié pour le tour **suivant** (ligne `qualifications` en `phaseSaisie`).
  */
 export async function getResultatsByPhase(
   phaseSaisie: string,
   niveauxExclus: string[] = [],
 ): Promise<NiveauResultat[]> {
+  const phase = phaseSaisie as PhaseSaisie;
+  const phasePrec = phasePrecedentePourResultats(phase);
+
   const supabase = getSupabaseClient();
-  const phasesQualificationSource =
-    phaseSaisie === 'finale' ? (['demi_finale', 'finale'] as const) : ([phaseSaisie] as const);
+  const phasesACharger: PhaseSaisie[] =
+    phase === 'qualification'
+      ? ['qualification']
+      : phase === 'demi_finale'
+        ? ['qualification', 'demi_finale']
+        : ['demi_finale'];
 
   const [elevesRes, qualifsRes, notesRes] = await Promise.all([
     supabase.from('eleves').select('id, nom, prenom, niveau').order('nom', { ascending: true }),
     (supabase.from('qualifications'))
-      .select('eleve_id')
-      // En finale, on considère automatiquement les qualifiés de demi-finale
-      // (et les éventuels enregistrements explicites déjà en finale).
-      .in('phase', phasesQualificationSource),
+      .select('eleve_id, phase')
+      .in('phase', phasesACharger),
     supabase
       .from('notes')
       .select('eleve_id, jury, total, moyenne, scores, recorded_at')
@@ -157,9 +189,18 @@ export async function getResultatsByPhase(
     niveau: string;
   }[];
 
-  const qualifiedIds = new Set<string>(
-    (qualifsRes.data ?? []).map((r: { eleve_id: string }) => r.eleve_id),
+  const idsParPhase = (qualifsRes.data ?? []).reduce<Record<string, Set<string>>>(
+    (acc, row: { eleve_id: string; phase: string }) => {
+      acc[row.phase] = acc[row.phase] ?? new Set();
+      acc[row.phase].add(row.eleve_id);
+      return acc;
+    },
+    {},
   );
+
+  const passesTourPrecedent =
+    phasePrec != null ? (idsParPhase[phasePrec] ?? new Set<string>()) : null;
+  const qualifiePourSuite = idsParPhase[phase] ?? new Set<string>();
 
   const notesByEleve = (
     (notesRes.data ?? []) as {
@@ -180,12 +221,17 @@ export async function getResultatsByPhase(
   const byNiveau: Record<string, EleveResultat[]> = {};
 
   for (const eleve of elevesData) {
-    const isQualified = qualifiedIds.has(eleve.id);
     const eleveNotes = (notesByEleve[eleve.id] ?? [])
       .sort((a, b) => (a.recorded_at ?? '').localeCompare(b.recorded_at ?? ''));
 
-    // N'afficher que les élèves qui ont une note ou une qualification pour cette phase
-    if (!isQualified && eleveNotes.length === 0) continue;
+    if (passesTourPrecedent != null) {
+      if (!passesTourPrecedent.has(eleve.id)) continue;
+    } else if (!qualifiePourSuite.has(eleve.id) && eleveNotes.length === 0) {
+      continue;
+    }
+
+    const badgeQualifie =
+      phase === 'finale' ? true : qualifiePourSuite.has(eleve.id);
 
     const moyenneGlobale =
       eleveNotes.length > 0
@@ -198,7 +244,7 @@ export async function getResultatsByPhase(
       prenom: eleve.prenom,
       name: `${eleve.prenom} ${eleve.nom}`,
       niveau: eleve.niveau,
-      qualified: isQualified,
+      qualified: badgeQualifie,
       notes: eleveNotes.sort((a, b) => a.jury.localeCompare(b.jury, 'fr')),
       moyenneGlobale,
     };
