@@ -22,3 +22,13 @@ export function phasePrecedentePourResultats(phase: PhaseSaisie): PhaseSaisie | 
   if (phase === 'finale') return 'demi_finale';
   return null;
 }
+
+/**
+ * Quand `PHASE_SAISIE` vaut `finale`, les coches admin enregistrent les finalistes
+ * sous la **phase du tour précédent** (pas sous `finale`), pour rester aligné avec
+ * `phasePrecedentePourResultats('finale')` utilisé par les pages résultats / créneaux.
+ * Ce n’est pas `getPhaseSaisieFromEnv()` : la variable d’env est la phase *courante*.
+ */
+export function phaseStockageQualifQuandFinale(): PhaseSaisie {
+  return phasePrecedentePourResultats('finale')!;
+}

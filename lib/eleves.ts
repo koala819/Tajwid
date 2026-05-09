@@ -132,6 +132,8 @@ export type EleveResultat = {
   name: string;
   niveau: string;
   qualified: boolean;
+  /** Lauréat après la finale (`qualifications.phase = vainqueur`) */
+  vainqueur?: boolean;
   notes: NoteJury[];
   /** Moyenne globale calculée depuis les notes (null si aucune note) */
   moyenneGlobale: number | null;
@@ -146,10 +148,9 @@ export type NiveauResultat = {
 
 /**
  * Page résultats selon `PHASE_SAISIE` :
- * - qualification : élèves avec au moins une note de qualification, ou pastille qualifié (tour actuel).
- * - demi_finale : uniquement les élèves qualifiés à la fin du tour **qualification** (phase précédente).
- * - finale : uniquement les élèves qualifiés à la fin de la **demi-finale** (phase précédente).
- * La pastille « Qualifié » sur la ligne = qualifié pour le tour **suivant** (ligne `qualifications` en `phaseSaisie`).
+ * - **qualification** : notes ou pastille « qualifié » pour ce tour.
+ * - **demi_finale** : élèves du tour demi-finale (qualifiés du tour précédent ou déjà notés) ; pastille « Qualifié » = `qualifications.phase = demi_finale`.
+ * - **finale** : finalistes = qualifiés fin de demi-finale (`qualifications` tour précédent) ; pastille **Gagnant** = `qualifications.phase = vainqueur` (décochable en admin).
  */
 export async function getResultatsByPhase(
   phaseSaisie: string,
@@ -159,12 +160,15 @@ export async function getResultatsByPhase(
   const phasePrec = phasePrecedentePourResultats(phase);
 
   const supabase = getSupabaseClient();
-  const phasesACharger: PhaseSaisie[] =
+  /* Phases `qualifications` à charger : tour courant + précédent ; en `finale` + marqueurs « gagnant ». */
+  const phasesACharger: (PhaseSaisie | 'vainqueur')[] =
     phase === 'qualification'
-      ? ['qualification']
-      : phase === 'demi_finale'
-        ? ['qualification', 'demi_finale']
-        : ['demi_finale'];
+      ? [phase]
+      : phase === 'finale' && phasePrec != null
+        ? [phasePrec, 'vainqueur']
+        : phasePrec != null
+          ? [phasePrec, phase]
+          : [phase];
 
   const [elevesRes, qualifsRes, notesRes] = await Promise.all([
     supabase.from('eleves').select('id, nom, prenom, niveau').order('nom', { ascending: true }),
@@ -201,6 +205,7 @@ export async function getResultatsByPhase(
   const passesTourPrecedent =
     phasePrec != null ? (idsParPhase[phasePrec] ?? new Set<string>()) : null;
   const qualifiePourSuite = idsParPhase[phase] ?? new Set<string>();
+  const vainqueurIds = idsParPhase['vainqueur'] ?? new Set<string>();
 
   const notesByEleve = (
     (notesRes.data ?? []) as {
@@ -235,6 +240,7 @@ export async function getResultatsByPhase(
 
     const badgeQualifie =
       phase === 'finale' ? true : qualifiePourSuite.has(eleve.id);
+    const estVainqueur = phase === 'finale' && vainqueurIds.has(eleve.id);
 
     const moyenneGlobale =
       eleveNotes.length > 0
@@ -248,6 +254,7 @@ export async function getResultatsByPhase(
       name: `${eleve.prenom} ${eleve.nom}`,
       niveau: eleve.niveau,
       qualified: badgeQualifie,
+      vainqueur: phase === 'finale' ? estVainqueur : undefined,
       notes: eleveNotes.sort((a, b) => a.jury.localeCompare(b.jury, 'fr')),
       moyenneGlobale,
     };

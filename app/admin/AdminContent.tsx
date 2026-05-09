@@ -8,19 +8,30 @@ import { t, type Language } from '@/data/translations';
 import EditNoteModal from '@/components/EditNoteModal';
 import PublishToggle from '@/components/PublishToggle';
 import QualifierToggle from '@/components/QualifierToggle';
+import WinnerToggle from '@/components/WinnerToggle';
 import { noteEleveDisplayName } from '@/lib/noteHelpers';
+import type { PhaseSaisie } from '@/lib/phaseSaisie';
 
 type AdminContentProps = {
+  phaseSaisie: PhaseSaisie;
   niveaux: Niveau[];
   notesGrouped: Record<string, NoteRow[]>;
   qualifiedEleveIds: string[];
+  winnerEleveIds: string[];
 };
 
 const formatDate = (value?: string | null) =>
   value ? new Date(value).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
-export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds }: AdminContentProps) {
+export default function AdminContent({
+  phaseSaisie,
+  niveaux,
+  notesGrouped,
+  qualifiedEleveIds,
+  winnerEleveIds,
+}: AdminContentProps) {
   const qualifiedSet = new Set(qualifiedEleveIds);
+  const winnerSet = new Set(winnerEleveIds);
   const [selectedNiveau, setSelectedNiveau] = useState<string>(niveaux[0]?.slug || '');
   const [editingNote, setEditingNote] = useState<NoteRow | null>(null);
   const [detailsForEleveId, setDetailsForEleveId] = useState<string | null>(null);
@@ -177,6 +188,9 @@ export default function AdminContent({ niveaux, notesGrouped, qualifiedEleveIds 
                         eleveId={eleveId}
                         qualified={qualifiedSet.has(eleveId)}
                       />
+                      {phaseSaisie === 'finale' ? (
+                        <WinnerToggle eleveId={eleveId} winner={winnerSet.has(eleveId)} />
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => setDetailsForEleveId(eleveId)}

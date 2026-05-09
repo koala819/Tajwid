@@ -117,7 +117,10 @@ export default function ClientResultats(props: ClientResultatsProps) {
                     role="tablist"
                   >
                     {props.niveaux.map((niveau) => {
-                      const qualifCount = niveau.eleves.filter((e) => e.qualified).length;
+                      const badgeCount =
+                        phaseSaisie === 'finale'
+                          ? niveau.eleves.filter((e) => e.vainqueur).length
+                          : niveau.eleves.filter((e) => e.qualified).length;
                       return (
                         <button
                           key={niveau.slug}
@@ -138,9 +141,15 @@ export default function ClientResultats(props: ClientResultatsProps) {
                           <span className="whitespace-nowrap">
                             {isAr ? niveau.labelAr : niveau.label}
                           </span>
-                          {qualifCount > 0 && (
-                            <span className="ms-2 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs tabular-nums text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                              {qualifCount}
+                          {badgeCount > 0 && (
+                            <span
+                              className={`ms-2 inline-block rounded-full px-2 py-0.5 text-xs tabular-nums ${
+                                phaseSaisie === 'finale'
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+                                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
+                              }`}
+                            >
+                              {badgeCount}
                             </span>
                           )}
                         </button>
@@ -177,7 +186,16 @@ export default function ClientResultats(props: ClientResultatsProps) {
                                     <span className="text-sm font-normal text-stone-400 dark:text-stone-500">/{maxScore}</span>
                                   </p>
                                 )}
-                                {eleve.qualified ? (
+                                {phaseSaisie === 'finale' ? (
+                                  eleve.vainqueur ? (
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+                                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                      </svg>
+                                      {t('winnerBadge', lang)}
+                                    </span>
+                                  ) : null
+                                ) : eleve.qualified ? (
                                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
                                     <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                                       <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />

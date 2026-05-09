@@ -2,13 +2,12 @@ import { NextResponse } from 'next/server';
 
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { isAuthenticated } from '@/lib/auth';
-import { getPhaseSaisieFromEnv } from '@/lib/phaseSaisie';
+import { getPhaseSaisieFromEnv, phaseStockageQualifQuandFinale } from '@/lib/phaseSaisie';
 
 /**
  * Insère ou supprime une ligne dans `qualifications (eleve_id, phase)`.
  * - qualification / demi_finale : `phase` = `PHASE_SAISIE`.
- * - finale : on enregistre `demi_finale` (les finalistes sont les « qualifiés »
- *   de la demi-finale ; la page résultats en `finale` filtre sur cette clé).
+ * - finale : `phase` = `phaseStockageQualifQuandFinale()` (= tour précédent, défini dans `phaseSaisie.ts`).
  */
 export async function POST(request: Request) {
   const authenticated = await isAuthenticated();
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     const phaseEnv = getPhaseSaisieFromEnv();
-    const phaseRow = phaseEnv === 'finale' ? 'demi_finale' : phaseEnv;
+    const phaseRow = phaseEnv === 'finale' ? phaseStockageQualifQuandFinale() : phaseEnv;
     const supabase = getSupabaseClient();
 
     /* Le générateur de types Supabase n'étant pas utilisé (types manuels),
@@ -47,10 +46,9 @@ export async function POST(request: Request) {
       }
     } else {
       const del = (table as any).delete().eq('eleve_id', eleveId);
+      const phasesSupprFinale = [phaseStockageQualifQuandFinale(), 'finale'] as const;
       const { error } =
-        phaseEnv === 'finale'
-          ? await del.in('phase', ['demi_finale', 'finale'])
-          : await del.eq('phase', phaseRow);
+        phaseEnv === 'finale' ? await del.in('phase', phasesSupprFinale) : await del.eq('phase', phaseRow);
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }

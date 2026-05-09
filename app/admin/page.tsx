@@ -2,7 +2,11 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import type { NoteRow } from '@/types/supabase';
 import { getNiveauxPhaseResultats } from '@/data/niveaux';
 import { isAuthenticated } from '@/lib/auth';
-import { getPhaseSaisieFromEnv, type PhaseSaisie } from '@/lib/phaseSaisie';
+import {
+  getPhaseSaisieFromEnv,
+  phasePrecedentePourResultats,
+  type PhaseSaisie,
+} from '@/lib/phaseSaisie';
 import { redirect } from 'next/navigation';
 import AdminNav from '@/components/AdminNav';
 import AdminHeader from '@/components/AdminHeader';
@@ -75,18 +79,30 @@ export default async function AdminPage() {
     (niveau) => grouped[niveau.slug]?.length > 0,
   );
 
-  // Pastilles admin : en finale, finalistes = `demi_finale` (API) ou anciennes lignes `finale`
+  // Pastilles admin : en finale, clés = tour précédent (comme l’API) ou anciennes lignes `finale`
   const eleveIds = [...new Set(levelRows.map((r) => r.eleve_id).filter(Boolean))];
   let qualifiedEleveIds: Set<string> = new Set();
   if (eleveIds.length > 0) {
     const phasesQualifAdmin =
-      phaseSaisie === 'finale' ? (['demi_finale', 'finale'] as const) : [phaseSaisie];
+      phaseSaisie === 'finale'
+        ? ([phasePrecedentePourResultats('finale')!, 'finale'] as const)
+        : [phaseSaisie];
     const { data: qualifData } = (await getSupabaseClient()
       .from('qualifications')
       .select('eleve_id')
       .in('eleve_id', eleveIds)
       .in('phase', phasesQualifAdmin)) as { data: Array<{ eleve_id: string }> | null };
     qualifiedEleveIds = new Set((qualifData ?? []).map((r) => r.eleve_id));
+  }
+
+  let winnerEleveIds: Set<string> = new Set();
+  if (phaseSaisie === 'finale' && eleveIds.length > 0) {
+    const { data: winData } = (await getSupabaseClient()
+      .from('qualifications')
+      .select('eleve_id')
+      .in('eleve_id', eleveIds)
+      .eq('phase', 'vainqueur')) as { data: Array<{ eleve_id: string }> | null };
+    winnerEleveIds = new Set((winData ?? []).map((r) => r.eleve_id));
   }
 
   return (
@@ -102,9 +118,11 @@ export default async function AdminPage() {
         ) : null}
 
         <AdminContent
+          phaseSaisie={phaseSaisie}
           niveaux={niveauxHifdh}
           notesGrouped={grouped}
           qualifiedEleveIds={[...qualifiedEleveIds]}
+          winnerEleveIds={[...winnerEleveIds]}
         />
       </main>
     </div>

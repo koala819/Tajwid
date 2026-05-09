@@ -103,7 +103,7 @@ export type Database = {
   };
 };
 
-export type QualificationPhase = 'qualification' | 'demi_finale' | 'finale';
+export type QualificationPhase = 'qualification' | 'demi_finale' | 'finale' | 'vainqueur';
 
 export type QualificationRow = {
   eleve_id: string;
